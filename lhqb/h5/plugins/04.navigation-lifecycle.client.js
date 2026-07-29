@@ -27,18 +27,39 @@ export default defineNuxtPlugin((nuxtApp) => {
     startRouteLoading()
     store.dispatch('setTransitionName', '')
 
-    if (!store.state.initInfo || !Object.keys(store.state.initInfo).length) {
-      store.dispatch('getInitInfo')
+    const accessToken = tokenStorage.get() || ''
+    const isEntryRoute = to.path === '/'
+    const isLoginRoute = to.path === '/sign/login'
+    const isTokenLogin = isEntryRoute && Boolean(to.query.token)
+
+    // The app entry must never mount the home page or request init before auth is known.
+    if (!accessToken && isEntryRoute && !isTokenLogin) {
+      if (store.state.user.logged) {
+        await store.dispatch('user/forceLogout')
+      }
+      stopRouteLoading()
+      return { path: '/sign/login', replace: true }
     }
 
-    const accessToken = tokenStorage.get() || ''
     if (accessToken) {
       if (!store.state.user.logged) {
-        store.commit('user/SET_LOGGED', true)
-        store.dispatch('user/getUserInfo').catch(() => {})
+		try {
+		  await store.dispatch('user/getUserInfo')
+		} catch (error) {
+		  await store.dispatch('user/forceLogout')
+		  if (isEntryRoute) {
+			stopRouteLoading()
+			return { path: '/sign/login', replace: true }
+		  }
+		}
       }
     } else if (store.state.user.logged) {
-      store.dispatch('user/forceLogout')
+	  await store.dispatch('user/forceLogout')
+	}
+
+	// The login page does not depend on platform initialization.
+	if (!isLoginRoute && !isTokenLogin && (!store.state.initInfo || !Object.keys(store.state.initInfo).length)) {
+	  store.dispatch('getInitInfo').catch(() => {})
     }
     stopRouteLoading()
     return true

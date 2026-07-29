@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS=--no-deprecation&& nuxt dev --host 192.168.109.143 --port 8888",
+    "dev": "node scripts/dev-server.mjs",
     "dev:all": "set NODE_OPTIONS=--no-deprecation&& nuxt dev --host 0.0.0.0 --port 8888",
     "build": "set NODE_OPTIONS=--no-deprecation&& nuxt build",
     "start": "node .output/server/index.mjs",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "cobe": "^2.0.1",
     "core-js": "^3.39.0",
     "nuxt": "^4.4.8",
     "qrcode.vue": "^3.6.0",

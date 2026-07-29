@@ -1,10 +1,10 @@
 const withTrailingSlash = value => value.endsWith('/') ? value : `${value}/`
 
 export const WEB_URL = withTrailingSlash(
-  process.env.NUXT_PUBLIC_API_BASE || 'https://apixo.lol/'
+	process.env.NUXT_PUBLIC_API_BASE || 'https://neuranet.site/'
 )
 export const IMG_BASE_URL = withTrailingSlash(
-  process.env.NUXT_PUBLIC_IMG_BASE || `${WEB_URL}upload/`
+	process.env.NUXT_PUBLIC_IMG_BASE || `${WEB_URL}upload/`
 )
 
 // 部署路径

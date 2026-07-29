@@ -22,7 +22,6 @@
             class="notice-item"
             @click="viewDetail(item)"
           >
-            <span class="notice-tag">{{ $t('homeHero.latest') }}</span>
             <span class="notice-text">{{ item.post_title }}</span>
           </button>
         </van-swipe-item>
@@ -123,16 +122,6 @@ export default {
   text-align: left;
 }
 
-.notice-tag {
-  flex: 0 0 auto;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(240, 196, 110, 0.14);
-  color: @home-accent;
-  font-size: 11px;
-  font-weight: 700;
-}
-
 .notice-text {
   color: @home-text;
   font-size: 13px;
@@ -176,8 +165,5 @@ export default {
     font-size: 12px;
   }
 
-  .notice-tag {
-    font-size: 10px;
-  }
 }
 </style>

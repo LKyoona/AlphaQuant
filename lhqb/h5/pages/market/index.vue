@@ -27,7 +27,19 @@
 					<van-tabs v-model:active="active" swipeable animated sticky>
 						<van-tab v-for="item in platform" :key="item.name">
 							<template #title>{{ $t(item.label) }}</template>
-							<template v-if="hasBalance">
+							<template v-if="!isPlatformAuthorized(item.label)">
+								<div class="api-connect-card">
+									<crypto-network-globe />
+									<div class="api-connect-copy">
+										<h3>{{ $t('pageMarket.not') }}</h3>
+									</div>
+									<nuxt-link to="/authorize" class="api-connect-btn">
+										<span>{{ $t('pageMarket.add') }}</span>
+										<van-icon name="arrow" />
+									</nuxt-link>
+									</div>
+							</template>
+							<template v-else-if="hasBalance">
 								<div class="amount amount-has">
 									<div class="amount-copy">
 										<span>{{ $t('pageMarket.balance') }}</span>
@@ -51,7 +63,10 @@
 									</div>
 								</div>
 							</template>
-							<assets-list :platform="item.label"></assets-list>
+							<assets-list
+								v-if="isPlatformAuthorized(item.label)"
+								:platform="item.label"
+							></assets-list>
 						</van-tab>
 					</van-tabs>
 				</template>
@@ -91,9 +106,11 @@
 		mapActions
 	} from 'vuex'
 	import assetsList from '@/components/market/assetsList'
+	import CryptoNetworkGlobe from '@/components/market/CryptoNetworkGlobe'
 	export default {
 		components: {
-			assetsList
+			assetsList,
+			CryptoNetworkGlobe
 		},
 		data() {
 			return {
@@ -102,7 +119,8 @@
 				loadError: false,
 				isLoading: false,
 				isBalanceLoading: false,
-				pageReady: false
+				pageReady: false,
+				platformAccess: {}
 			}
 		},
 		computed: {
@@ -153,13 +171,14 @@
 		},
 		watch: {
 			active(newVal) {
-				this.loadBalance(newVal)
+				const label = this.resolvePlatformLabel(newVal)
+				if (this.pageReady && this.isPlatformAuthorized(label)) {
+					this.loadBalance(newVal)
+				}
 			}
 		},
 		async mounted() {
-			await this.syncPlatformAuth()
-			this.loadBalance(this.active)
-			this.pageReady = true
+			await this.initializeMarket()
 		},
 		methods: {
 			...mapActions({
@@ -167,18 +186,51 @@
 				getApiAccount: 'authorize/getApiAccount',
 				setApiInfo: 'authorize/setApiInfo'
 			}),
-			syncPlatformAuth () {
-				if (!this.logged || !this.hasPlatform) {
-					return Promise.resolve()
+			async initializeMarket () {
+				this.pageReady = false
+				this.loadError = false
+				this.account = null
+				this.platformAccess = {}
+				if (!this.logged) {
+					this.pageReady = true
+					return
 				}
-				const tasks = (this.platform || []).map((item, index) => {
-					this.getApiAccount({ platform: item.label })
-						.then((res) => {
-							this.setApiInfo([index, this.normalizeApiInfo(res.data)])
-						})
-						.catch(() => {})
+				try {
+					await this.syncPlatformAuth()
+					const label = this.resolvePlatformLabel(this.active)
+					if (this.isPlatformAuthorized(label)) {
+						await this.loadBalance(this.active)
+					}
+				} catch (error) {
+					this.loadError = true
+				} finally {
+					this.pageReady = true
+				}
+			},
+			async syncPlatformAuth () {
+				if (!this.logged || !this.hasPlatform) {
+					return
+				}
+				const tasks = (this.platform || []).map(async (item, index) => {
+					try {
+						const res = await this.getApiAccount({ platform: item.label })
+						const info = this.normalizeApiInfo(res.data)
+						this.setApiInfo([index, info])
+						this.platformAccess = {
+							...this.platformAccess,
+							[item.label]: this.canLoadPlatform(info)
+						}
+					} catch (error) {
+						if (!this.isMissingApiError(error)) {
+							throw error
+						}
+						this.platformAccess = {
+							...this.platformAccess,
+							[item.label]: false
+						}
+					}
 				})
-				return Promise.all(tasks)
+				await Promise.all(tasks)
 			},
 			normalizeApiInfo (data) {
 				const info = data || {}
@@ -189,24 +241,51 @@
 				const item = this.platform && this.platform[index]
 				return item && item.label ? item.label : ''
 			},
+			hasApi (info) {
+				return Boolean(
+					info && (
+						info.api_key ||
+						info.secret_key ||
+						info.has_api ||
+						info.is_bind ||
+						Number(info.bind_status) === 1 ||
+						[-1, 0, 1].includes(Number(info.status))
+					)
+				)
+			},
+			canLoadPlatform (info) {
+				return this.hasApi(info) && Number(info.status) !== -1
+			},
+			isMissingApiError (error) {
+				const message = String(error && (error.msg || error.message) || '')
+				return Boolean(error && error.code !== undefined) && /api|key|授权|绑定|添加/i.test(message)
+			},
+			isPlatformAuthorized (label) {
+				return Boolean(label && this.platformAccess[label])
+			},
 			loadBalance (index) {
 				if (!this.logged) {
 					this.account = null
 					this.loadError = false
 					this.isBalanceLoading = false
-					return
+					return Promise.resolve()
 				}
 				const label = this.resolvePlatformLabel(index)
 				if (!label) {
 					this.account = null
 					this.loadError = false
 					this.isBalanceLoading = false
-					return
+					return Promise.resolve()
+				}
+				if (!this.isPlatformAuthorized(label)) {
+					this.account = null
+					this.isBalanceLoading = false
+					return Promise.resolve()
 				}
 				this.loadError = false
 				this.isBalanceLoading = true
 				this.account = null
-				this.apiAccountBalance({ platform: label })
+				return this.apiAccountBalance({ platform: label })
 					.then((res) => {
 						const data = res && res.data ? res.data : null
 						this.account = data && data.free !== undefined ? data.free : data
@@ -223,8 +302,7 @@
 					})
 			},
 			retryLoad () {
-				this.loadError = false
-				this.loadBalance(this.active)
+				this.initializeMarket()
 			}
 		}
 	}
@@ -463,6 +541,69 @@
 		font-weight: 700;
 	}
 
+	.api-connect-card {
+		position: relative;
+		isolation: isolate;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 300px;
+		padding: 38px 24px 42px;
+		text-align: center;
+		overflow: hidden;
+		background:
+			radial-gradient(circle at 50% 28%, rgba(224, 177, 84, 0.16), transparent 30%),
+			linear-gradient(180deg, rgba(27, 19, 9, 0.96), rgba(12, 8, 4, 0.98));
+	}
+
+	.api-connect-card::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		width: 360px;
+		height: 360px;
+		border: 1px solid rgba(235, 196, 115, 0.06);
+		border-radius: 50%;
+		box-shadow: 0 0 80px rgba(191, 129, 40, 0.08);
+	}
+
+	.api-connect-copy {
+		max-width: 430px;
+	}
+
+	.api-connect-copy h3 {
+		margin: 0;
+		color: #fff2d2;
+		font-size: 21px;
+		font-weight: 800;
+		line-height: 1.35;
+	}
+
+	.api-connect-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		min-width: 150px;
+		height: 44px;
+		margin-top: 24px;
+		padding: 0 22px;
+		border: 1px solid rgba(255, 230, 174, 0.42);
+		border-radius: 12px;
+		background: linear-gradient(135deg, #9c6723 0%, #edc779 52%, #a66f29 100%);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 12px 28px rgba(114, 70, 15, 0.28);
+		color: #1b1004;
+		font-size: 14px;
+		font-weight: 800;
+		transition: transform .18s ease, filter .18s ease;
+	}
+
+	.api-connect-btn:active {
+		transform: translateY(1px) scale(.98);
+		filter: brightness(.94);
+	}
+
 	.amount {
 		padding: 16px 18px;
 		min-height: 88px;
@@ -597,6 +738,20 @@
 
 		.market-panel {
 			margin-top: 8px;
+		}
+
+		.api-connect-card {
+			min-height: 270px;
+			padding: 32px 20px 36px;
+		}
+
+		.api-connect-copy h3 {
+			font-size: 18px;
+		}
+
+		.api-connect-btn {
+			width: min(220px, 78vw);
+			height: 46px;
 		}
 
 		.amount {

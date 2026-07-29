@@ -159,6 +159,13 @@ export default {
 	homeHero: {
 		featured: '精选活动', live: '实时更新', platform_news: '平台快讯', latest: '最新动态', popular: '热门行情', overview: '市场概览', plaza: '策略广场', picks: '精选策略', quant: '量化', futures: '合约', spot: '现货', grid: '网格量化策略', grid_desc: '震荡行情，高抛低吸，稳定获利', tracking: '智能追踪策略', tracking_desc: '智能追踪，让买入成本更低，卖出盈利更高', hedge: '对冲套利策略', hedge_desc: '7*24h自动盯盘，捕捉套利机会', balance: '动态平衡策略', balance_desc: '高抛低吸，智能仓位管理，无风险套利', coming: '敬请期待', intro: '量化策略全天候运行，捕捉更高效率的交易节奏'
 	},
+	homeTicker: {
+		live: '实时行情',
+		updated: '更新于',
+		updating: '同步中...',
+		change24h: '24H',
+		empty: '暂无行情数据'
+	},
 	revenuePage: { overview: '收益概览', intro: '按时间查看策略收益明细，重点数据集中展示，方便团队内部复盘。', today: '今日盈利(USDT)', total: '累计盈利(USDT)', profit: '收益' },
 	pageNews: {
 		title: '新闻资讯',
@@ -196,6 +203,7 @@ export default {
 		market_intro: '查看交易平台、账户余额与可运行策略，整体视觉与首页统一，信息更集中。',
 		not: '您还未添加该平台的API',
 		add: '立即添加',
+		bind_api_desc: '连接交易所 API，安全读取账户余额并启用量化策略。',
 		balance: '账户余额',
 		balance_empty: '暂无可展示的余额数据',
 		loading: '余额加载中',

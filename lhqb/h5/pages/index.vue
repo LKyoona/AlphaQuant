@@ -13,6 +13,7 @@
 
 <script>
 import { mapActions } from 'vuex'
+import { tokenStorage } from '@/utils/storage'
 export default {
   data () {
     return {
@@ -29,6 +30,7 @@ export default {
     }),
     needAuth () {
       const homeHref = this.$router.resolve('/home').href
+	  const loginHref = this.$router.resolve('/sign/login').href
       if (this.authToken) {
         this.bootTip = 'Verifying authorization...'
         this.$toast.loading('身份验证中...')
@@ -43,8 +45,9 @@ export default {
             this.$toast(msg)
           })
       } else {
-        this.bootTip = 'Redirecting to dashboard...'
-        window.location.replace(homeHref)
+		const accessToken = tokenStorage.get() || ''
+		this.bootTip = accessToken ? 'Redirecting to dashboard...' : 'Redirecting to sign in...'
+		window.location.replace(accessToken ? homeHref : loginHref)
       }
     }
   }

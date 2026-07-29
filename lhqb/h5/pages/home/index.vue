@@ -41,7 +41,7 @@
 						</div>
 					</div>
 
-					<div class="panel">
+					<div class="panel panel-notice">
 						<div class="panel-head panel-head-thin">
 							<span>{{ $t('homeHero.platform_news') }}</span>
 							<em>{{ $t('homeHero.latest') }}</em>
@@ -49,13 +49,14 @@
 						<notice></notice>
 					</div>
 
-					<div class="panel panel-rank">
-						<div class="panel-head panel-head-thin">
-							<span>{{ $t('homeHero.popular') }}</span>
-							<em>{{ $t('homeHero.overview') }}</em>
-						</div>
-						<rank></rank>
+				</div>
+
+				<div class="panel panel-rank">
+					<div class="panel-head panel-head-thin">
+						<span>{{ $t('homeHero.popular') }}</span>
+						<em>{{ $t('homeHero.overview') }}</em>
 					</div>
+					<rank></rank>
 				</div>
 			</div>
 
@@ -506,8 +507,10 @@
 
 		.side-stack {
 			display: grid;
-			grid-template-rows: 160px minmax(78px, auto) minmax(0, 1fr);
+			grid-template-rows: 198px minmax(0, 1fr);
 			gap: 12px;
+			min-width: 0;
+			height: 320px;
 		}
 
 		.hero-card {
@@ -519,8 +522,51 @@
 		}
 
 		.panel-banner,
+		.panel-notice,
 		.panel-rank {
 			min-height: 0;
+		}
+
+		.panel-banner,
+		.panel-notice {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.panel-banner .panel-head,
+		.panel-notice .panel-head {
+			flex: 0 0 auto;
+		}
+
+		.panel-banner .my-swipe,
+		.panel-banner .promo-fallback {
+			flex: 1 1 auto;
+			min-height: 0;
+			height: auto;
+		}
+
+		.panel-banner .banner-image {
+			height: 100%;
+		}
+
+		.panel-notice :deep(.notice-bar) {
+			flex: 1 1 auto;
+			min-height: 0;
+			border: 0;
+			border-radius: 0;
+			background:
+				radial-gradient(circle at 92% 50%, rgba(248, 215, 144, 0.1), transparent 36%),
+				linear-gradient(180deg, rgba(31, 22, 11, 0.7), rgba(17, 11, 5, 0.82));
+		}
+
+		.panel-notice :deep(.notice-viewport),
+		.panel-notice :deep(.notice-swipe),
+		.panel-notice :deep(.notice-item) {
+			height: 42px;
+		}
+
+		.panel-rank {
+			grid-column: 1 / -1;
 		}
 
 		.my-swipe,
@@ -534,17 +580,6 @@
 			max-width: none;
 		}
 
-		.my-swipe {
-			height: 160px;
-		}
-
-		.banner-image {
-			height: 160px;
-		}
-
-		.promo-fallback {
-			height: 160px;
-		}
 	}
 
 	@media (max-width: 767px) {

@@ -143,6 +143,13 @@ export default {
   homeHero: {
     featured: 'Featured', live: 'Live updates', platform_news: 'Platform News', latest: 'Latest', popular: 'Popular Markets', overview: 'Market Overview', plaza: 'Strategy Plaza', picks: 'Featured Strategies', quant: 'Quant', futures: 'Futures', spot: 'Spot', grid: 'Grid Quant Strategy', grid_desc: 'Buy low and sell high in volatile markets.', tracking: 'Smart Tracking Strategy', tracking_desc: 'Track intelligently for lower entry costs and better exits.', hedge: 'Hedging Arbitrage Strategy', hedge_desc: '24/7 monitoring to capture arbitrage opportunities.', balance: 'Dynamic Balance Strategy', balance_desc: 'Smart position management for risk-controlled arbitrage.', coming: 'Coming soon', intro: 'Quant strategies run around the clock to capture more efficient trading opportunities.'
   },
+  homeTicker: {
+    live: 'LIVE MARKET',
+    updated: 'Updated',
+    updating: 'Syncing...',
+    change24h: '24H',
+    empty: 'No market data'
+  },
   revenuePage: { overview: 'Profit Overview', intro: 'Review strategy profit details by time with key data gathered for internal analysis.', today: 'Today\'s Profit (USDT)', total: 'Cumulative Profit (USDT)', profit: 'Profit' },
   pageNews: {
     title: 'News',
@@ -180,6 +187,7 @@ export default {
     market_intro: 'View trading platforms, account balances, and available strategies in one focused market view.',
     not: 'You have not added the platform\'s API',
     add: 'Add Now',
+    bind_api_desc: 'Connect your exchange API to securely access balances and enable strategies.',
     balance: 'Balance',
     balance_empty: 'No balance data is available to show',
     loading: 'Loading balance',
