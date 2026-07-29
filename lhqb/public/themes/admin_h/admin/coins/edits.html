@@ -1,0 +1,222 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('coins/index')}" class="btn btn-primary btn-xs active">币种列表</a>
+                        <a href="{:url('coins/edits')}" class="btn btn-primary btn-xs">修改币种信息</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('coins/editpost')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>币种名称</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-coin_name" name="coin_name" value="{$coin_data.coin_name}" required="required">
+                                <input type="hidden" name="id" value="{$coin_data.id}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>币种符号</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-coin_symbol" name="coin_symbol" value="{$coin_data.coin_symbol}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>币种类型(coin/token)</label>
+                            <div class="col-sm-6">
+                                <input name="coin_type" value="coin" type="radio" 
+                                <eq name="coin_data.coin_type" value="coin">checked </eq>
+                                >coin &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input name="coin_type" value="token" type="radio" 
+                                <eq name="coin_data.coin_type" value="token">checked </eq>
+                                >token
+                                <!-- <input type="text" class="form-control" id="input-coin_type" name="coin_type"> -->
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>币种图片</label>
+                            <div class="col-sm-6">
+                                <div class="col-sm-3">
+                                        <neq name="coin_data.img_url" value="">
+                                              原图片:  <img <eq name="coin_data['img_url'][0]" value="h">src="{$coin_data.img_url}"<else />src="http://{$server}/upload/{$coin_data.img_url}"</eq>
+                                                width="50px" height="50px">
+                                        </neq>
+
+                                </div>
+                                <div class="col-sm-9">
+
+                                     更换:
+                                    <input type="text" class="form-control" id="input-img_url" name="img_urls">
+                                    <a href="javascript:uploadOneImage('图片上传','#input-img_url');">修改图片</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+    
+
+
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最小手续费</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-min_fee" size=20 name="min_fee" value='{$coin_data.min_fee|sprintf="%10f",###}'>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最大手续费</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-max_fee" name="max_fee" value='{$coin_data.max_fee|sprintf="%10f",###}'>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>美元价格</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-usd_price" name="usd_price" value="{$coin_data.usd_price}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>                        
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>转账时候的提示</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-tips" name="tips" value="{$coin_data.tips}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div id = "show_token">
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="form-required"></span>代币父币种</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="input-parent_coin" name="parent_coin" value="{$coin_data.parent_coin}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="form-required"></span>合约地址</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="input-contract" name="contract" value="{$coin_data.contract}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>币种计算位数</label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" id="input-coin_decimal" min=1 step=1 name="coin_decimal" value="{$coin_data.coin_decimal}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        <!--
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>Rpc 服务器IP</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rpc_ip" name="rpc_ip"  value="{$coin_data.rpc_ip}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>Rpc 端口</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rpc_port" name="rpc_port" value="{$coin_data.rpc_port}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+    
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>Rpc 用户名</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rpc_user" name="rpc_user" value="{$coin_data.rpc_user}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>Rpc 密码</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rpc_pass" name="rpc_pass" value="{$coin_data.rpc_pass}">
+                            </div>
+                        </div>
+
+                                <div class="hr-line-dashed">
+                                </div>-->
+                        <!-- <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required"></span>memo的名称(memo/tag)</label>
+                            <div class="col-sm-6">
+                                <input name="memo_name" value="memo" type="radio" 
+                                    <eq name="coin_data.memo_name" value="memo">checked </eq>
+                                >memo &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input name="memo_name" value="tag" type="radio" 
+                                <eq name="coin_data.memo_name" value="tag">checked </eq>
+                                >tag
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div> -->
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('EDIT')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        $('input[name="coin_type"]').val()  == "coin" ? $('#show_token').hide() :  $('#show_token').show();;
+           
+            $('input[name="coin_type"]').change(function() {
+                var val = $(this).val();
+                if( val == "coin"){
+                    $('#show_token').hide();
+                }else{
+                    $('#show_token').show();
+                }
+            })
+            
+        </script>
+    </body>
+    </html>

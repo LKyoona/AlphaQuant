@@ -1,0 +1,100 @@
+<include file="public@header"/>
+<style>
+    .label{
+        cursor: pointer;
+    }
+    .tips{
+        display: none;
+        position: fixed;
+        top: 40%;
+        left: 40%;
+        min-width: 200px;
+        max-width: 700px;
+        transform: translate(-50%,-50%);
+        z-index: 99999;
+        text-align: center;
+        padding: 15px;
+        border-radius: 5px;
+        color:black;
+        background-color: #f2dede;
+        border-color: #d6e9c6;
+    }
+    .edits{
+        cursor:pointer;
+        color:coral;
+    }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>奖励设置</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">设置列表</a>
+                        </div>
+                    </div>
+
+
+<div class="ibox-content">
+        <div class="tips"></div><!-- 提示框 -->
+
+<table class="table table-hover" id="menus-table">
+    <thead>
+        <tr>
+            <th>推荐等级</th>
+            <th>直推人数</th>
+            <th>财奖励</th>
+            
+            <th width="150">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <eq name="datas" value="">
+                <tr>
+                    <td colspan="5" style="text-align: center">暂无数据</td>
+                </tr>
+        <else />
+            <foreach name="datas" item="vo">
+                <tr>
+                    <td>{$vo.level_name}</td>
+                    <td>{$vo.min_num}-{$vo.max_num}</td>
+                    <td>{$vo.revenue_rate}</td>
+                    
+                    <td>
+                    <a href="{:url('Invite/edits',['id'=> $vo.id  ]  )}">修改</a> 
+                    </td>
+                </tr>
+            </foreach>
+    </eq>
+    </tbody>
+</table>
+</div>
+<div class="pagination"></div>
+
+
+                    </div>
+                </div>
+        </div>
+    </div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function checktag(id,tag,type){
+        $.ajax({
+            url:"{:url('Invite/uptag')}",
+            type:"post",
+            data:{id:id,tag:tag,type:type},
+            success:function(data){
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+            }
+        })
+    }
+</script>
+</body>
+</html>

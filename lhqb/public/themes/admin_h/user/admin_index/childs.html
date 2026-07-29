@@ -1,0 +1,103 @@
+<include file="public@header"/>
+<style>
+.invite-summary { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+.invite-summary .card { min-width: 150px; padding: 14px 18px; border: 1px solid #e7eaec; border-radius: 7px; background: #f8fafc; }
+.invite-summary .card strong { display: block; margin-top: 5px; font-size: 24px; color: #1f2937; }
+.invite-level { display: inline-block; min-width: 56px; padding: 3px 8px; border-radius: 12px; text-align: center; color: #fff; }
+.invite-level.level-1 { background: #18a689; }
+.invite-level.level-2 { background: #1c84c6; }
+.invite-level.level-3 { background: #f8ac59; }
+.invite-table-wrap { overflow-x: auto; }
+.invite-table-wrap table { min-width: 1180px; }
+</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>{$rootUser.user_nickname|default=$rootUser.user_login}（ID: {$uid}）的三级推荐列表</h5>
+                    <div class="ibox-tools">
+                        <if condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/invitationManagement')">
+                            <a href="{:url('AdminIndex/invitationManagement')}" class="btn btn-info btn-xs">邀请码管理</a>
+                        </if>
+                        <a href="{:url('AdminIndex/index')}" class="btn btn-primary btn-xs">返回用户列表</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="invite-summary">
+                        <div class="card">一级直推<strong>{$inviteCounts[1]}</strong></div>
+                        <div class="card">二级推荐<strong>{$inviteCounts[2]}</strong></div>
+                        <div class="card">三级推荐<strong>{$inviteCounts[3]}</strong></div>
+                        <div class="card">三级合计<strong>{:array_sum($inviteCounts)}</strong></div>
+                    </div>
+
+                    <php>
+                        $inviteUsers = [];
+                        foreach ($list as $item) {
+                            $item['_invite_level'] = 1;
+                            $inviteUsers[] = $item;
+                        }
+                        foreach ($list2 as $item) {
+                            $item['_invite_level'] = 2;
+                            $inviteUsers[] = $item;
+                        }
+                        foreach ($list3 as $item) {
+                            $item['_invite_level'] = 3;
+                            $inviteUsers[] = $item;
+                        }
+                    </php>
+
+                    <div class="invite-table-wrap">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>层级</th>
+                                <th>用户ID</th>
+                                <th>上级ID</th>
+                                <th>用户名/手机</th>
+                                <th>昵称</th>
+                                <th>邀请码</th>
+                                <th>直属邀请数</th>
+                                <th>量化盈利</th>
+                                <th>分润收入</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <foreach name="inviteUsers" item="vo">
+                                <tr>
+                                    <td><span class="invite-level level-{$vo._invite_level}">{$vo._invite_level}级</span></td>
+                                    <td>{$vo.id}</td>
+                                    <td>{$vo.parent_user_id|default='-'}</td>
+                                    <td>{$vo['user_login']?$vo['user_login']:($vo['mobile']?$vo['mobile']:lang('THIRD_PARTY_USER'))}</td>
+                                    <td>{$vo['user_nickname']?$vo['user_nickname']:lang('NOT_FILLED')}</td>
+                                    <td>{$vo.invitation_code|default='-'}</td>
+                                    <td>{$vo.invitation_count|default=0}</td>
+                                    <td><php>echo getRevenue($vo['id'])</php> USDT</td>
+                                    <td><php>echo getReturnRevenue($vo['id'])</php> USDT</td>
+                                    <td>{:date('Y-m-d H:i:s',$vo['create_time'])}</td>
+                                    <td>
+                                        <a href="{:url('AdminIndex/childs',['uid'=>$vo.id])}">查看下三级</a>
+                                        <if condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/simulateDisk')">
+                                            <a href="{:url('AdminIndex/simulateDisk',['id'=>$vo.id])}">模拟盘</a>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </foreach>
+                            <empty name="inviteUsers">
+                                <tr><td colspan="11" class="text-center">当前用户暂无三级以内邀请关系</td></tr>
+                            </empty>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

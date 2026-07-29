@@ -1,0 +1,465 @@
+<include file="public@header" />
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#A" data-toggle="tab">单页配置</a></li>
+            <li><a href="#B" data-toggle="tab">社群配置</a></li>
+            <li><a href="#C" data-toggle="tab">推送配置</a></li>
+            <li><a href="#D" data-toggle="tab">注册配置</a></li>
+            <li><a href="#E" data-toggle="tab">升级配置</a></li>
+            <li><a href="#F" data-toggle="tab">量化分润设置</a></li>
+            <li><a href="#G" data-toggle="tab" style="display:none">邀请制度设置</a></li>
+
+        </ul>
+        <form class="form-horizontal js-ajax-form margin-top-20" role="form" action="{:url('appconfig/indexPost')}"
+            method="post">
+            <fieldset>
+                <div class="ibox-content">
+                    <div class="tabbable">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="A">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>客服设置</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control"
+                                            name="app_config[system_customer_service]"
+                                            value="{$app_config.system_customer_service|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-site_icp" class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>服务协议</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" id="input-site_icp"
+                                            name="app_config[system_user_agreement]"
+                                            value="{$app_config.system_user_agreement|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-site_icp" class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>隐私政策</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" id="input-site_gwa"
+                                            name="app_config[system_privacy_policy]"
+                                            value="{$app_config.system_privacy_policy|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-site_admin_email" class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>帮助中心</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" id="input-site_admin_email"
+                                            name="app_config[system_help_center]"
+                                            value="{$app_config.system_help_center|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>如何使用Google两步验证</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[google_auth_help]"
+                                            value="{$app_config.google_auth_help|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>分享活动规则</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[share_activity_rule]"
+                                            value="{$app_config.share_activity_rule|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="B">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>Telegram</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control"
+                                            name="app_config[official_telegram_group_chat]"
+                                            value="{$app_config.official_telegram_group_chat|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span
+                                            class="form-required">*</span>Whatsapp</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control"
+                                            name="app_config[official_whatsapp_group_chat]"
+                                            value="{$app_config.official_whatsapp_group_chat|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="C">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span class="form-required">*</span>极光推送APP
+                                        Key</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[jpush_app_key]"
+                                            value="{$app_config.jpush_app_key|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label"><span class="form-required">*</span>极光推送Master
+                                        Secret</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[jpush_master_secret]"
+                                            value="{$app_config.jpush_master_secret|default=''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="D">
+                                <div class="form-group">
+                                    <label for="input-banned_usernames"
+                                        class="col-sm-2 control-label">是否强制要求注册邀请码</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <select class="form-control" name="app_config[must_invite_code]">
+                                            <php>
+                                                if(isset($app_config['must_invite_code'])&&$app_config['must_invite_code']
+                                                == "1"){
+                                                $must_invite_code_selected = 'selected';
+                                                $not_must_invite_code_selected = '';
+                                                }else{
+                                                $must_invite_code_selected = '';
+                                                $not_must_invite_code_selected = 'selected';
+                                                }
+                                            </php>
+                                            <option value="0" {$not_must_invite_code_selected}>否</option>
+                                            <option value="1" {$must_invite_code_selected}>是</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">是否关闭注册</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <select class="form-control" name="app_config[close_reg]">
+                                            <php>
+                                                if(isset($app_config['close_reg'])&&$app_config['close_reg'] == "1"){
+                                                $close_reg_selected = 'selected';
+                                                $open_reg_selected = '';
+                                                }else{
+                                                $close_reg_selected = '';
+                                                $open_reg_selected = 'selected';
+                                                }
+                                            </php>
+                                            <option value="0" {$open_reg_selected}>否</option>
+                                            <option value="1" {$close_reg_selected}>是</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="E">
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">安卓版本号</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[android_version]"
+                                            value="{$app_config.android_version|default='1'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">安卓下载地址</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[android_download_url]"
+                                            value="{$app_config.android_download_url|default='http://etbank.honorsql.com/'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">安卓新版本描述</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control"
+                                            name="app_config[android_version_description]"
+                                            value="{$app_config.android_version_description|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">IOS版本号</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[ios_version]"
+                                            value="{$app_config.ios_version|default='1'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">IOS下载地址</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[ios_download_url]"
+                                            value="{$app_config.ios_download_url|default='http://etbank.honorsql.com/'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">IOS新版本描述</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control"
+                                            name="app_config[ios_version_description]"
+                                            value="{$app_config.ios_version_description|default=''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="F">
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">系统计费方式</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <select class="form-control" name="app_config[quant_revenue_type]">
+                                            <php>
+                                                if(isset($app_config['quant_revenue_type'])&&$app_config['quant_revenue_type']
+                                                == "2"){
+                                                $balance_selected = 'selected';
+                                                $usdt_selected = '';
+                                                }else{
+                                                $balance_selected = '';
+                                                $usdt_selected = 'selected';
+                                                }
+                                            </php>
+                                            <option value="1" {$usdt_selected}>USDT</option>
+                                            <notempty name="balance_name">
+                                                <option value="2" {$balance_selected}>{$balance_name}</option>
+                                            </notempty>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <notempty name="balance_name">
+                                    <div class="form-group">
+                                        <label for="input-banned_usernames"
+                                            class="col-sm-2 control-label">充值USDT转换{$balance_name}比例</label>
+                                        <div class="col-md-6 col-sm-10">
+                                            <input type="text" class="form-control"
+                                                name="app_config[quant_usdt_to_balance_rate]"
+                                                value="{$app_config.quant_usdt_to_balance_rate|default='0'}">
+                                        </div>
+                                    </div>
+                                </notempty>
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">启动机器人所需数量(<empty
+                                            name="balance_name">USDT
+                                            <else />{$balance_name}
+                                        </empty>)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[quant_startup_min]"
+                                            value="{$app_config.quant_startup_min|default='100'}">
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames"
+                                        class="col-sm-2 control-label">激活码价格(USDT)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[cdkey_price]"
+                                            value="{$app_config.cdkey_price|default='0'}"> 
+                                    </div> 0 表示关闭激活码
+                                </div>
+                                
+                                <!--<div class="form-group">-->
+                                <!--    <label for="input-banned_usernames"-->
+                                <!--        class="col-sm-2 control-label">托管费用(%)</label>-->
+                                <!--    <div class="col-md-6 col-sm-10">-->
+                                <!--        <input type="text" class="form-control" name="app_config[quant_start_rate]"-->
+                                <!--            value="{$app_config.quant_start_rate|default='0'}">-->
+                                <!--    </div>-->
+                                <!--</div>-->
+                                <!--<div class="form-group">-->
+                                <!--    <label for="input-banned_usernames"-->
+                                <!--        class="col-sm-2 control-label">收益分成(%)</label>-->
+                                <!--    <div class="col-md-6 col-sm-10">-->
+                                <!--        <input type="text" class="form-control" name="app_config[quant_revenue_rate]"-->
+                                <!--            value="{$app_config.quant_revenue_rate|default='0'}">-->
+                                <!--    </div>-->
+                                <!--</div>-->
+                                
+                                <!--<div class="form-group">-->
+                                <!--    <label for="input-banned_usernames"-->
+                                <!--        class="col-sm-2 control-label">每次抽奖消费积分</label>-->
+                                <!--    <div class="col-md-6 col-sm-10">-->
+                                <!--        <input type="text" class="form-control" name="app_config[game_num]"-->
+                                <!--            value="{$app_config.game_num|default='0'}">-->
+                                <!--    </div>-->
+                                <!--</div>-->
+                                
+                                <!--<div class="form-group">-->
+                                <!--    <label for="input-banned_usernames"-->
+                                <!--        class="col-sm-2 control-label">中奖金额(%)</label>-->
+                                <!--    <div class="col-md-6 col-sm-10">-->
+                                <!--        <input type="text" class="form-control" name="app_config[game_rate]"-->
+                                <!--            value="{$app_config.game_rate|default='0'}">-->
+                                <!--    </div>-->
+                                <!--</div>-->
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames"
+                                        class="col-sm-2 control-label">系统扣除量化收益占比(%)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[quant_system_rate]"
+                                            value="{$app_config.quant_system_rate|default='0'}">
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">一级分润比例(%)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[quant_level1_rate]"
+                                            value="{$app_config.quant_level1_rate|default='0'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">二级分润比例(%)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[quant_level2_rate]"
+                                            value="{$app_config.quant_level2_rate|default='0'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="G">
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">开启自定义邀请规则</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <select class="form-control" name="app_config[diy_invite_rule]">
+                                            <php>
+                                                if(isset($app_config['diy_invite_rule'])&&$app_config['diy_invite_rule']
+                                                == "1"){
+                                                $diy_selected = 'selected';
+                                                $default_selected = '';
+                                                }else{
+                                                $diy_selected = '';
+                                                $default_selected = 'selected';
+                                                }
+                                            </php>
+                                            <option value="0" {$default_selected}>否</option>
+                                            <option value="1" {$diy_selected}>是</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- <div class="form-group">
+                                    <label for="input-banned_usernames"
+                                        class="col-sm-2 control-label">合伙人年终分红(%)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[partner_year_rate]"
+                                            value="{$app_config.partner_year_rate|default='0'}">
+                                    </div>
+                                </div> -->
+                                                                
+                                <!-- 
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">合伙人数量</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[partner_num]"
+                                            value="{$app_config.partner_num|default='0'}">
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames"
+                                        class="col-sm-2 control-label">合伙人月度分红(%)</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[partner_month_rate]"
+                                            value="{$app_config.partner_month_rate|default='0'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">合伙人充值金额</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[partner_recharge_num]"
+                                            value="{$app_config.partner_recharge_num|default='0'}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-banned_usernames" class="col-sm-2 control-label">成为合伙人赠送燃料</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="text" class="form-control" name="app_config[partner_gas_num]"
+                                            value="{$app_config.partner_gas_num|default='0'}">
+                                    </div>
+                                </div> -->
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary js-ajax-submit" data-refresh="1">
+                                            {:lang('SAVE')}
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<include file="public@header"/>
+<style>
+.gw_num{border: 1px solid #dbdbdb;width: 110px;line-height: 26px;overflow: hidden;}
+.gw_num em{display: block;height: 26px;width: 26px;float: left;color: #7A7979;border-right: 1px solid #dbdbdb;text-align: center;cursor: pointer;}
+.gw_num .num{display: block;float: left;text-align: center;width: 52px;font-style: normal;font-size: 14px;line-height: 24px;border: 0;}
+.gw_num em.add{float: right;border-right: 0;border-left: 1px solid #dbdbdb;}
+</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>实盘付费申请列表</h5>
+                    <div class="ibox-tools">
+                        <a href="#" class="btn btn-primary btn-xs active">实盘付费申请列表</a>
+                    </div>                    
+                </div>
+                <div class="ibox-content">
+
+                    <form class="js-ajax-form" action="" method="post">
+                        <table class="table table-hover table-bordered table-list">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户ID</th>
+                            <th>用户昵称</th>
+                            <th>付费订阅币种</th>
+                            <th>订阅价格</th>
+                            <th>订阅周期</th>
+                            <th>状态</th>
+                            <th>{:lang('ACTIONS')}</th>
+                        </tr>
+                        </thead>
+                        <php>
+                        $statuses=array("0"=>"已关闭","1"=>"已通过","2"=>"待审核");
+            </php>
+                        <tbody>
+                        <foreach name="list" item="vo">
+                        <tr>
+                            <td>{$vo.id}</td>                    
+                            <td>{$vo.uid}</td>
+                            <td>{$vo.user_nickname}</td>
+                            <td>{$vo.coin_symbol}</td>
+                            <td>{$vo.amount}</td>
+                            <td>{$vo.days}</td>
+                            <td>{$statuses[$vo['status']]}</td>
+                            <td>
+                                <eq name="vo.status" value="2">
+                                    <a href="{:url('adminIndex/agree',array('id'=>$vo['id']))}"
+                                       class="js-ajax-dialog-btn"
+                                       data-msg="确定要通过审批吗">通过</a>
+                                </eq>
+                                <a href="{:url('adminIndex/edit',array('id'=>$vo['uid']))}">管理</a>
+                            </td>                            
+                        </tr>
+                        </foreach>
+                        </tbody>
+                        <tfoot>
+
+                        </tfoot>
+                        </table>
+                        <div class="pagination">
+                            {$page|default=''}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>激活码使用记录</h5>
+                        <div class="ibox-tools">
+                        <a href="{:url('Cdkey/index')}" class="btn btn-primary btn-xs active">激活码列表</a>
+                        </div>
+                    </div>
+<div class="ibox-content">
+
+
+        <table class="table table-hover" id="menus-table">
+            <thead>
+                <tr>
+                    <th width="100">激活码</th>
+                    <th>用户ID</th>
+                    <th>使用时间</th>
+                </tr>
+            </thead>
+            <tbody>
+
+
+                    <foreach name="datas" item="vo">
+                        <tr>
+                            <td> {$vo.keys} </td>
+                            <td> {$vo.uid} </td>
+                            <td>{$vo.ctime|date="Y-m-d H:i",###}</td>
+                        </tr>
+                    </foreach>
+  
+            </tbody>
+        </table>
+
+
+
+
+    
+    <div class="pagination">
+            <div>
+            </div>
+            {$page|default=''}
+        
+    </div>
+</div>
+
+                    </div>
+                </div>
+        </div>
+    </div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

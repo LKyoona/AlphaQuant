@@ -1,0 +1,96 @@
+<include file="public@header" />
+
+
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>第三方授权API</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">第三方授权API</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+
+                            <table class="table table-hover" id="menus-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>平台</th>
+                                        <th>用户ID</th>
+                                        <th>Api Key</th>
+                                        <th>Secret Key</th>
+                                        <th>Passphrase</th>
+                                        <th>创建时间</th>
+                                        <th>更新时间</th>
+                                        <th>API状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <php> $status_name = array('0'=>'已删除','1'=>'正常','-1'=>'已失效'); </php>
+
+                                    <eq name="datas" value="">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                        <else />
+
+                                        <foreach name="datas" item="vo">
+
+                                            <tr>
+                                                <td>{$vo.id} </td>
+                                                <td>{$vo.platform} </td>
+                                                <td>{$vo.uid} </td>
+                                                <td>{$vo.api_key} </td>
+                                                <td>{$vo.secret_key}</td>
+                                                <td>{$vo.passphrase}</td>
+                                                <td>{$vo.create_time|date="Y-m-d H:i",###}</td>
+                                                <td>{$vo.update_time|date="Y-m-d H:i",###}</td>
+                                                <td>{$status_name[$vo.status]}</td>
+
+                                            </tr>
+                                        </foreach>
+                                    </eq>
+                                </tbody>
+                            </table>
+
+
+
+                            <div class="pagination">
+                                <div>
+                                    当前共有数据 <span style="color:blue;font-weight:bold">{$num}</span> 条
+                                </div>
+                                {$page|default=''}
+
+                            </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        function checktag(id, tag, type) {
+            $.ajax({
+                url: "{:url('Third/uptag')}",
+                type: "post",
+                data: { id: id, tag: tag, type: type },
+                success: function (data) {
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

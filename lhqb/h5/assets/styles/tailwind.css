@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html, body, #__nuxt {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-[#0f1218] text-[#f7ebc6] antialiased;
+  }
+}
+
+@layer components {
+  .gold-card {
+    @apply rounded-2xl border border-[#d9b05c]/30 bg-[linear-gradient(180deg,rgba(28,20,10,0.96),rgba(18,12,6,0.98))] shadow-[0_24px_50px_rgba(8,10,14,0.38)];
+  }
+
+  .gold-btn {
+    @apply inline-flex items-center justify-center rounded-xl border border-[#d9b05c]/20 bg-[linear-gradient(180deg,#8d5c1f_0%,#f1cd86_100%)] px-4 font-bold text-[#1a1208] shadow-[0_10px_20px_rgba(0,0,0,0.18)];
+  }
+
+  .gold-input {
+    @apply rounded-xl border border-[#f5d280]/35 bg-white/5 px-3 py-3 text-[#fff8e3] placeholder:text-[#ffecc1]/75;
+  }
+}

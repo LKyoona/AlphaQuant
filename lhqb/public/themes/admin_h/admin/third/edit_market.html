@@ -1,0 +1,87 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>编辑</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('Third/index')}" class="btn btn-primary btn-xs active">第三方市场列表</a>
+                        <a href="{:url('Third/add')}" class="btn btn-primary btn-xs">编辑市场</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('Third/editpost')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>平台</label>
+                            <div class="col-sm-6">
+                                <select  class="form-control" name="platform" >
+                                    <foreach name="platforms" item="vo">
+                                        <option value="{$vo}" <eq name="data.platform" value="$vo">selected</eq>>{$vo}</option>
+                                    </foreach>
+                                </select>
+                                <input type="hidden" name="id" value="{$data.id}">
+                            </div>                                                       
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>交易对名称</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-market_name" name="market_name" required="required" value="{$data.market_name}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>交易对标识</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-market" name="market" required="required" value="{$data.market}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>交易币种</label>
+                            <div class="col-sm-6">
+                                <select  class="form-control" name="stock" >
+                                    <foreach name="coin" item="vo">
+                                        <option value="{$vo}" <eq name="data.stock" value="$vo">selected</eq>>{$vo}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>结算币种</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-money" name="money" required="required" value="{$data.money}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                       
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('EDIT')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    </body>
+    </html>

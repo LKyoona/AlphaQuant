@@ -1,0 +1,83 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('Invite/index')}" class="btn btn-primary btn-xs active">推荐奖励设置</a>
+                        <a href="{:url('Invite/edits')}" class="btn btn-primary btn-xs">修改推荐设置</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('Invite/editpost')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>推荐等级</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-level_name" name="level_name" value="{$setting_data.level_name}" required="required" disabled>
+                                <input type="hidden" name="id" value="{$setting_data.id}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最低推荐人数</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-min_num" name="min_num" value="{$setting_data.min_num}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最高推荐人数</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-max_num" name="max_num" value="{$setting_data.max_num}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>奖励</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-revenue_rate" name="revenue_rate" value="{$setting_data.revenue_rate}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('EDIT')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        $('input[name="coin_type"]').val()  == "coin" ? $('#show_token').hide() :  $('#show_token').show();;
+
+            $('input[name="coin_type"]').change(function() {
+                var val = $(this).val();
+                if( val == "coin"){
+                    $('#show_token').hide();
+                }else{
+                    $('#show_token').show();
+                }
+            })
+
+        </script>
+    </body>
+    </html>

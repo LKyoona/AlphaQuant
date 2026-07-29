@@ -1,0 +1,71 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>任务列表</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">任务列表</a>
+                            <a href="{:url('Cron/add')}" class="btn btn-primary btn-xs">添加任务</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <table class="table table-hover" id="menus-table">
+                            <thead>
+                                <tr>
+                                    <th width="60">ID</th>
+                                    <th>用户ID</th>
+                                    <th>用户姓名</th>
+                                    <th>任务名称</th>
+                                    <th>执行参数</th>
+                                    <th width="300">执行结果</th>
+                                    <th>计划开启时间</th>
+                                    <th>执行失败次数</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <eq name="datas" value="">
+                                    <tr> 
+                                        <td colspan="5" style="text-align: center">暂无数据</td>
+                                    </tr>
+                                <else />
+                                    <foreach name="datas" item="vo">
+                                    <tr>
+                                        <td>{$vo.id} </td>
+                                        <td>{$vo.uid} </td>
+                                        <td>{$vo.uname} </td>
+                                        <td>{$vo.task_name} </td>
+                                        <td>{$vo.params} </td>
+                                        <td style="word-break:break-all;">{$vo.result}</td>
+                                        <td>{$vo.schedule_time|date="Y-m-d H:i",###}</td>
+                                        <td>{$vo.fail_times}</td>
+                                        <td>{$status[$vo.status]}</td>
+                                        <td>
+                                            <a href="{:url('Cron/edit',['id'=> $vo.id  ]  )}">修改</a> | 
+                                            <a href="{:url('Cron/del',['id'=> $vo.id  ]  )}" class="js-ajax-delete">删除</a>
+                                        </td>
+                                    </tr>
+                                    </foreach>
+                                </eq>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <div>
+                                当前共有数据 <span style="color:blue;font-weight:bold">{$num}</span> 条
+                            </div>
+                            {$page|default=''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

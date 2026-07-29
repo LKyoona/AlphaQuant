@@ -1,0 +1,20 @@
+[Unit]
+Description=Neuranet production backup
+After=mysql.service
+Requires=mysql.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/sbin/lhqb-backup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/data/lhqb/backups /data/lhqb/logs/application
+
+[Install]
+WantedBy=multi-user.target

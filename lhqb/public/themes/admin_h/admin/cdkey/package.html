@@ -1,0 +1,120 @@
+<include file="public@header" />
+<style>
+    .label {
+        cursor: pointer;
+    }
+
+    .tips {
+        display: none;
+        position: fixed;
+        top: 40%;
+        left: 40%;
+        min-width: 200px;
+        max-width: 700px;
+        transform: translate(-50%, -50%);
+        z-index: 99999;
+        text-align: center;
+        padding: 15px;
+        border-radius: 5px;
+        color: black;
+        background-color: #f2dede;
+        border-color: #d6e9c6;
+    }
+
+    .edits {
+        cursor: pointer;
+        color: coral;
+    }
+</style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>套餐列表</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">套餐列表</a>
+                            <a href="{:url('Cdkey/addpack')}" class="btn btn-primary btn-xs">添加套餐</a>
+                        </div>
+                    </div>
+
+
+                    <div class="ibox-content">
+                        <div class="tips"></div><!-- 提示框 -->
+                        <form class="js-ajax-form" action="{:url('Shop/listorderss')}" method="post">
+                            <div class="table-actions">
+                            </div>
+                            <table class="table table-hover" id="menus-table">
+                                <thead>
+                                    <tr>
+                                        <th width="40">ID</th>
+                                        <th>会员套餐名称</th>
+                                        <th>周期(天)</th>
+                                        <th>价格USDT</th>
+                                        <th>状态</th>
+                                        <th width="150">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <eq name="datas" value="">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                        <else />
+                                        <foreach name="datas" item="vo">
+                                            <tr>
+                                                <td>{$vo.id}</td>
+                                                <td>{$vo.package_name}</td>
+                                                <td>{$vo.period}</td>
+                                                <td>{$vo.price}</td>
+                                               
+                                                <td>
+                                                    <eq name="vo.status" value="1">
+                                                        <span class="label label-info"
+                                                            onclick="checktag('{$vo.id}','status','0')">正常</span>&nbsp;&nbsp;&nbsp;
+                                                        <else />
+                                                        <span class="label label-default"
+                                                            onclick="checktag('{$vo.id}','status','1')">已停用</span>&nbsp;&nbsp;&nbsp;
+                                                    </eq>
+                                                </td>
+                                                <td>
+                                                    <a href="{:url('Cdkey/editpack',['id'=> $vo.id  ]  )}">修改</a> |
+                                                    <a href="{:url('Cdkey/delpack',['id'=> $vo.id  ]  )}"
+                                                        class="js-ajax-delete">删除</a>|
+                                                    <a href="{:url('Cdkey/logpack',['id'=> $vo.id  ]  )}">使用记录</a </td>
+                                            </tr>
+                                        </foreach>
+                                    </eq>
+                                </tbody>
+                            </table>
+                    </div>
+                    <div class="pagination"></div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        function checktag(id, tag, type) {
+            $.ajax({
+                url: "{:url('Cdkey/uppack')}",
+                type: "post",
+                data: { id: id, tag: tag, type: type },
+                success: function (data) {
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

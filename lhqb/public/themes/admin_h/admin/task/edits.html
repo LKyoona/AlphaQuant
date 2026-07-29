@@ -1,0 +1,119 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('task/index')}" class="btn btn-primary btn-xs active">任务列表</a>
+                        <a href="{:url('task/edits')}" class="btn btn-primary btn-xs">修改任务信息</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('task/editpost')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务名称</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-task_name" name="task_name" value="{$task_data.task_name}" required="required">
+                                <input type="hidden" name="id" value="{$task_data.id}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                      <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务图标</label>
+                            <div class="col-sm-6">
+                                <div class="col-sm-3">
+                                        <neq name="task_data.task_icon" value="">
+                                              原图片:  <img src="/upload/{$task_data.task_icon}" width="50px" height="50px">
+                                        </neq>
+
+                                </div>
+                                <div class="col-sm-9">
+
+                                     更换:
+                                    <input type="text" class="form-control" id="input-task_icon" name="task_icon" value="{$task_data.task_icon}">
+                                    <a href="javascript:uploadOneImage('图片上传','#input-task_icon');">修改图片</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+    
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务描述</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-task_description" name="task_description" value="{$task_data.task_description}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务类型(daily/single)</label>
+                            <div class="col-sm-6">
+                                <input name="task_type" value="daily" type="radio" 
+                                <eq name="task_data.task_type" value="daily">checked </eq>
+                                >每日任务 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input name="task_type" value="single" type="radio" 
+                                <eq name="task_data.task_type" value="single">checked </eq>
+                                >单次任务
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务奖励</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rewards" size=20 name="rewards" value='{$task_data.rewards}'>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务标识符</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-task_identifier" size=20 name="task_identifier" value='{$task_data.task_identifier}'>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                    
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('EDIT')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        $('input[name="coin_type"]').val()  == "coin" ? $('#show_token').hide() :  $('#show_token').show();;
+           
+            $('input[name="coin_type"]').change(function() {
+                var val = $(this).val();
+                if( val == "coin"){
+                    $('#show_token').hide();
+                }else{
+                    $('#show_token').show();
+                }
+            })
+            
+        </script>
+    </body>
+    </html>

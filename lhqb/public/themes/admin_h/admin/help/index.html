@@ -1,0 +1,71 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>列表</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('help/index')}" class="btn btn-primary btn-xs active">列表</a>
+                    </div>
+                </div>
+
+
+                <div class="ibox-content">
+                    <div class="tips"></div><!-- 提示框 -->
+                    <form class="js-ajax-form" method="post" action="">
+                        <table class="table table-hover" id="menus-table">
+                            <thead>
+                            <tr>
+                                <th width="50">编号</th>
+                                <th width="90">Email</th>
+                                <th width="30">手机号</th>
+                                <th width="100">标题</th>
+                                <th width="80">描述</th>
+                                <th width="120">提交时间</th>
+                                <th width="80">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <empty name="datas">
+                                <tr>
+                                    <td colspan="3" style="text-align: center">暂无数据</td>
+                                </tr>
+                                <else/>
+                                <foreach name="datas" item="vo">
+                                    <tr>
+                                        <td>{$vo.id}</td>
+                                        <td>{$vo.email}</td>
+                                        <td>{$vo.mobile}</td>
+                                        <td>{$vo.title}</td>
+                                        <td><a href="javascript:artdialogAlertV2('{$vo.content}','描述','face-smile')">{$vo.content|msubstr=0,15}</a></td>
+                                        <td>{$vo.ctime|date="Y-m-d H:i",###}</td>
+                                        <td>
+                                            <a href="{:url('help/status',['id'=> $vo.id,'status'=>0]  )}"
+                                               class="js-ajax-delete">删除</a> |
+                                            <if condition="$vo.status eq 1">
+                                            <a href="{:url('help/status',['id'=> $vo.id,'status'=>2])}"
+                                               class="js-ajax-delete" data-msg="确定标记为已处理吗？">标记</a>
+                                                <else />
+                                                {$status[$vo['status']]}
+                                            </if>
+                                        </td>
+                                    </tr>
+                                </foreach>
+                            </empty>
+                            </tbody>
+                        </table>
+                        <div class="pagination">{$page}</div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

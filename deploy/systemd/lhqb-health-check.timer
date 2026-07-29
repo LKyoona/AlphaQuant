@@ -1,0 +1,12 @@
+[Unit]
+Description=Check Neuranet production health every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=lhqb-health-check.service
+
+[Install]
+WantedBy=timers.target

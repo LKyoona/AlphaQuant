@@ -1,0 +1,93 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('Cron/index')}" class="btn btn-primary btn-xs ">任务列表</a>
+                        <a href="{:url('Cron/add')}" class="btn btn-primary btn-xs active">添加任务</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('Cron/addpot')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>任务名称</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="task_name" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>执行用户</label>
+                            <div class="col-sm-6">
+                                <select  class="form-control" name="uid" >
+                                    <foreach name="user_data" item="vo">
+                                        <option value="{$vo.id}">{$vo.uname}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>执行参数</label>
+                            <div class="col-sm-6" id = "params">
+                                   <div >
+                                        参数名：<input type="text"   name="params_name[]">&nbsp;&nbsp;
+                                        参数值：<input type="text"   size="50" name="params[]">
+                                    </div>
+                            </div>
+                            <span  onclick="addinput('params')"><img  width="25px" height="25px" src="/img/add.png"></span>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>计划开始时间</label>
+                            <div class="col-sm-6">
+                                <input type="text" name="schedule_time" value="{:date('Y-m-d H:i',time())}" class="js-datetime" style="width: 200px;">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submits">{:lang('ADD')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script >
+    function addinput(data){
+        var keywords=data;
+        var str='<div>参数名：<input type="text"   name="params_name[]">&nbsp;&nbsp;参数值：<input type="text" size="50" name="params[]"></div>';
+        $('#'+data).append(str);
+    }
+    var timeInput = $("input.currency");
+    if (timeInput.length) {
+        Wind.use('datePicker', function () {
+            timeInput.datePicker({
+                onlytime: true
+            });
+        });
+    }
+    </script>
+    </body>
+    </html>

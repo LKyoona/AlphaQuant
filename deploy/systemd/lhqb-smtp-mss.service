@@ -1,0 +1,13 @@
+[Unit]
+Description=Neuranet SMTP TCP MSS workaround
+After=network-online.target ufw.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/lhqb-smtp-mss apply
+ExecStop=/usr/local/sbin/lhqb-smtp-mss remove
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

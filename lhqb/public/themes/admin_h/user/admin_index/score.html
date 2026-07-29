@@ -1,0 +1,86 @@
+<include file="public@header"/>
+<style>
+.gw_num{border: 1px solid #dbdbdb;width: 110px;line-height: 26px;overflow: hidden;}
+.gw_num em{display: block;height: 26px;width: 26px;float: left;color: #7A7979;border-right: 1px solid #dbdbdb;text-align: center;cursor: pointer;}
+.gw_num .num{display: block;float: left;text-align: center;width: 52px;font-style: normal;font-size: 14px;line-height: 24px;border: 0;}
+.gw_num em.add{float: right;border-right: 0;border-left: 1px solid #dbdbdb;}
+</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>积分变动列表</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="well form-inline margin-top-20" method="post" action="{:url('user/adminIndex/score')}">
+                        用户ID：
+                        <input class="form-control" type="text" name="uid" style="width: 200px;" value="{:input('request.uid')}"
+                               placeholder="请输入用户ID">
+
+                        变动类型：
+                        <input class="form-control" type="text" name="keyword" style="width: 200px;" value="{:input('request.keyword')}"
+                               placeholder="变动类型">   
+
+                        关联ID：
+                        <input class="form-control" type="text" name="oid" style="width: 200px;" value="{:input('request.oid')}"
+                               placeholder="关联ID">   
+
+                        <input type="submit" class="btn btn-primary" value="搜索"/>
+                                                           
+                    </form>
+                    <form class="js-ajax-form" action="" method="post">
+                        <table class="table table-hover table-bordered table-list">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>支出类型</th>
+                            <th>用户ID</th>
+                            <th>积分类型</th>
+                            <th>变动金额</th>
+                            <th>变动后余额</th>
+                            <th>关联ID</th>
+                            <th>变动类型</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <foreach name="list" item="vo">
+                        <tr>
+                            <td>{$vo.id}</td>
+                            <td><eq name="vo.type" value="1">
+                                    <span class="label label-info">收入</span>
+                                <else />
+                                <span class="label label-default">支出</span>
+                                </eq>
+                            </td>
+    
+                            <td>{$vo.user_id}</td>
+                            <td>{$vo.balance_type}</td>
+                            <td>{$vo.change}</td>
+                            <td>{$vo.amount}</td>
+                            <td>{$vo.detial}</td>
+                            <td>{$vo.detial_type}</td>
+                            <td>{:date('Y-m-d H:i:s',$vo['ctime'])}</td>
+                        </tr>
+                        </foreach>
+                        </tbody>
+                        <tfoot>
+
+                        </tfoot>
+                        </table>
+                        <div class="pagination">
+                            {$page|default=''}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

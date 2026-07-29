@@ -1,0 +1,389 @@
+<include file="public@header"/>
+<style>
+body.gray-bg { background: #f3f5f8; }
+.invite-page { color: #263238; }
+.invite-toolbar {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) auto;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.invite-panel {
+    padding: 16px;
+    border: 1px solid #e8edf2;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(31, 45, 61, .05);
+}
+.invite-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: #17202a;
+}
+.invite-panel-title small { font-weight: 400; color: #8a96a3; }
+.invite-filter {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.invite-filter .form-control {
+    min-width: 0;
+    height: 38px;
+    border-radius: 4px;
+}
+.invite-filter .gold-btn {
+    flex: 0 0 70px;
+    min-width: 70px;
+}
+.invite-create {
+    display: grid;
+    grid-template-columns: 120px 140px auto;
+    gap: 10px;
+    align-items: center;
+}
+.gold-btn,
+.dark-btn {
+    height: 34px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 4px;
+    font-weight: 700;
+    line-height: 34px;
+    transition: all .16s ease;
+}
+.gold-btn {
+    color: #19140a !important;
+    background: linear-gradient(135deg, #ffe19a 0%, #d7a83c 100%);
+    box-shadow: 0 4px 10px rgba(190, 143, 34, .28);
+}
+.dark-btn {
+    color: #ffe3a3 !important;
+    background: #17140f;
+    border: 1px solid rgba(213, 170, 83, .38);
+}
+.gold-btn:hover,
+.dark-btn:hover {
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(33, 25, 15, .18);
+}
+.ghost-btn {
+    display: inline-flex;
+    flex: 0 0 60px;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #d9e1ea;
+    border-radius: 4px;
+    color: #596775 !important;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none !important;
+    background: #fff;
+}
+.invite-table-card {
+    border: 1px solid #e8edf2;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(31, 45, 61, .05);
+}
+.invite-table-wrap { overflow-x: auto; }
+.invite-table { min-width: 1120px; margin-bottom: 0; }
+.invite-table thead th {
+    border-bottom: 1px solid #e8edf2 !important;
+    color: #75808d;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f8fafc;
+}
+.invite-table tbody td {
+    vertical-align: middle !important;
+    border-top: 1px solid #edf1f5 !important;
+}
+.user-cell { min-width: 170px; }
+.user-id { font-weight: 800; color: #19212b; }
+.user-meta { margin-top: 4px; color: #8a96a3; font-size: 12px; }
+.code-stack { display: grid; gap: 8px; }
+.code-card-extra { display: none; }
+.code-more-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border: 1px dashed #d8dee6;
+    border-radius: 6px;
+    color: #7a8795;
+    font-size: 12px;
+    background: #fafbfd;
+}
+.code-more-btn {
+    padding: 0;
+    border: 0;
+    color: #9b6817;
+    font-weight: 700;
+    background: transparent;
+    cursor: pointer;
+}
+.code-card {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 90px 70px 160px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #eadfca;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #fffaf0 0%, #fff 62%);
+}
+.code-card.is-disabled {
+    border-color: #e3e7ed;
+    background: #f7f8fa;
+    opacity: .72;
+}
+.code-main {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: .8px;
+    color: #9b6817;
+    word-break: break-all;
+}
+.code-sub { color: #778391; font-size: 12px; }
+.code-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+.code-badge.ok { color: #126c43; background: #def7ea; }
+.code-badge.off { color: #6b7280; background: #eceff3; }
+.code-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    white-space: nowrap;
+}
+.empty-code {
+    padding: 12px;
+    border: 1px dashed #d7dde5;
+    border-radius: 6px;
+    color: #96a0aa;
+    background: #fbfcfe;
+}
+.pagination { padding: 14px 16px; margin: 0; background: #fff; }
+.invite-toast {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    z-index: 9999;
+    display: none;
+    min-width: 220px;
+    padding: 11px 16px;
+    border-radius: 6px;
+    color: #1d1609;
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(135deg, #ffe29d 0%, #d9aa45 100%);
+    box-shadow: 0 10px 24px rgba(33, 25, 15, .2);
+    transform: translateX(-50%);
+}
+@media (max-width: 900px) {
+    .invite-toolbar { grid-template-columns: 1fr; }
+    .invite-filter,
+    .invite-create { grid-template-columns: 1fr; display: grid; }
+    .invite-filter .form-control,
+    .invite-create .form-control,
+    .invite-filter .btn,
+    .invite-create .btn,
+    .ghost-btn,
+    .gold-btn { width: 100%; }
+}
+</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp invite-page">
+    <div class="invite-toolbar">
+        <div class="invite-panel">
+            <div class="invite-panel-title">
+                <span>快速查询</span>
+                <small>用户ID / 用户名 / 手机 / 分享码</small>
+            </div>
+            <form class="invite-filter" method="get" action="{:url('AdminIndex/invitationManagement')}">
+                <input type="text" name="keyword" class="form-control" value="{$keyword}" placeholder="输入用户或分享码">
+                <button type="submit" class="btn gold-btn">搜索</button>
+                <a href="{:url('AdminIndex/invitationManagement')}" class="ghost-btn">清空</a>
+            </form>
+        </div>
+
+        <if condition="$canManageInvitation">
+            <div class="invite-panel">
+                <div class="invite-panel-title">
+                    <span>后台生成分享码</span>
+                    <small>仅超级管理员</small>
+                </div>
+                <form class="invite-create" method="post" action="{:url('AdminIndex/createInvitationCodePost')}">
+                    <input class="form-control" type="number" name="owner_user_id" min="1" required placeholder="用户ID">
+                    <input class="form-control" type="number" name="max_use_count" min="0" placeholder="上限 0不限">
+                    <button class="btn gold-btn js-ajax-submit" type="submit">生成</button>
+                </form>
+            </div>
+        </if>
+    </div>
+
+    <div class="invite-table-card">
+        <div class="invite-table-wrap">
+            <table class="table table-hover invite-table">
+                <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>昵称</th>
+                    <th>分享码明细</th>
+                    <th>注册时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <foreach name="list" item="vo">
+                    <tr>
+                        <td class="user-cell">
+                            <div class="user-id">#{$vo.id}</div>
+                            <div class="user-meta">{$vo['user_login']?$vo['user_login']:($vo['mobile']?$vo['mobile']:'-')}</div>
+                        </td>
+                        <td>{$vo.user_nickname|default='-'}</td>
+                        <td>
+                            <div class="code-stack">
+                                <php>
+                                    $shareCodes = isset($codeMap[$vo['id']]) ? $codeMap[$vo['id']] : [];
+                                    $shareCodeCount = count($shareCodes);
+                                </php>
+                                <empty name="shareCodes">
+                                    <div class="empty-code">暂无分享码</div>
+                                <else/>
+                                    <!-- 初始只渲染第一条分享码 -->
+                                    <php>$code = reset($shareCodes);</php>
+                                    <if condition="$code.status === 0">
+                                        <div class="code-card is-disabled">
+                                    <else/>
+                                        <div class="code-card">
+                                    </if>
+                                        <div>
+                                            <div class="code-main">{$code.code}</div>
+                                            <div class="code-sub">
+                                                邀请链接：/app/sign/register?invitation_code={$code.code}
+                                            </div>
+                                        </div>
+                                        <div class="code-sub">{$code.used_count|default=0} / <if condition="$code.max_use_count">{$code.max_use_count}<else/>不限</if></div>
+                                        <div>
+                                            <if condition="$code.status === 0">
+                                                <span class="code-badge off">已停用</span>
+                                            <else/>
+                                                <span class="code-badge ok">正常</span>
+                                            </if>
+                                        </div>
+                                        <div class="code-actions">
+                                            <button type="button" class="btn btn-xs dark-btn js-copy-code" data-code="{$code.code}">复制</button>
+                                            <if condition="$canManageInvitation && !empty($code.id)">
+                                                <if condition="$code.status === 0">
+                                                    <a href="{:url('AdminIndex/toggleInvitationCodePost',['id'=>$code.id])}" class="js-ajax-dialog-btn btn btn-xs gold-btn">启用</a>
+                                                <else/>
+                                                    <a href="{:url('AdminIndex/toggleInvitationCodePost',['id'=>$code.id])}" class="js-ajax-dialog-btn btn btn-xs dark-btn">停用</a>
+                                                </if>
+                                            </if>
+                                        </div>
+                                    </div>
+
+                                    <if condition="$shareCodeCount gt 1">
+                                        <foreach name="shareCodes" item="code" key="codeIndex">
+                                            <if condition="$codeIndex gt 0">
+                                                <if condition="$code.status === 0">
+                                                    <div class="code-card code-card-extra is-disabled">
+                                                <else/>
+                                                    <div class="code-card code-card-extra">
+                                                </if>
+                                                    <div>
+                                                        <div class="code-main">{$code.code}</div>
+                                                        <div class="code-sub">
+                                                            邀请链接：/app/sign/register?invitation_code={$code.code}
+                                                        </div>
+                                                    </div>
+                                                    <div class="code-sub">{$code.used_count|default=0} / <if condition="$code.max_use_count">{$code.max_use_count}<else/>不限</if></div>
+                                                    <div>
+                                                        <if condition="$code.status === 0">
+                                                            <span class="code-badge off">已停用</span>
+                                                        <else/>
+                                                            <span class="code-badge ok">正常</span>
+                                                        </if>
+                                                    </div>
+                                                    <div class="code-actions">
+                                                        <button type="button" class="btn btn-xs dark-btn js-copy-code" data-code="{$code.code}">复制</button>
+                                                        <if condition="$canManageInvitation && !empty($code.id)">
+                                                            <if condition="$code.status === 0">
+                                                                <a href="{:url('AdminIndex/toggleInvitationCodePost',['id'=>$code.id])}" class="js-ajax-dialog-btn btn btn-xs gold-btn">启用</a>
+                                                            <else/>
+                                                                <a href="{:url('AdminIndex/toggleInvitationCodePost',['id'=>$code.id])}" class="js-ajax-dialog-btn btn btn-xs dark-btn">停用</a>
+                                                            </if>
+                                                        </if>
+                                                    </div>
+                                                </div>
+                                            </if>
+                                        </foreach>
+                                        <div class="code-more-bar">
+                                            <span>当前用户共 {$shareCodeCount} 个分享码</span>
+                                            <button type="button" class="code-more-btn js-toggle-codes" data-open="0">查看全部</button>
+                                        </div>
+                                    </if>
+                                </empty>
+                            </div>
+                        </td>
+                        <td>{:date('Y-m-d H:i:s',$vo.create_time)}</td>
+                    </tr>
+                </foreach>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">{$page|default=''}</div>
+    </div>
+</div>
+<div class="invite-toast" id="inviteToast"></div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+(function () {
+    function showToast(text) {
+        var $toast = $('#inviteToast');
+        $toast.text(text).stop(true, true).fadeIn(120);
+        setTimeout(function () {
+            $toast.fadeOut(180);
+        }, 1600);
+    }
+
+    $('.code-card-extra').hide();
+    $('.js-toggle-codes').attr('data-open', '0').text('查看全部');
+
+    $(document).on('click', '.js-toggle-codes', function () {
+        var $button = $(this);
+        var $stack = $button.closest('.code-stack');
+        var isOpen = $button.attr('data-open') === '1';
+
+        $stack.find('.code-card-extra').stop(true, true)[isOpen ? 'slideUp' : 'slideDown'](160);
+        $button.attr('data-open', isOpen ? '0' : '1').text(isOpen ? '查看全部' : '收起');
+    });
+
+    $(document).on('click', '.js-copy-code', function () {
+        var code = $(this).data('code');
+        var link = window.location.origin + '/app/sign/register?invitation_code=' + encodeURIComponent(code);
+        var $input = $('<input>');
+        $('body').append($input);
+        $input.val(link).select();
+        document.execCommand('copy');
+        $input.remove();
+        showToast('邀请链接已复制');
+    });
+})();
+</script>
+</body>
+</html>

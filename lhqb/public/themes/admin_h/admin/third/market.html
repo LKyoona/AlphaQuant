@@ -1,0 +1,116 @@
+<include file="public@header" />
+
+
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>第三方市场列表</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">第三方市场列表</a>
+                            <a href="{:url('Third/addMarket')}" class="btn btn-primary btn-xs">添加市场</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <form class="js-ajax-form" action="{:url('Third/listorderss')}" method="post">
+                            <div class="table-actions">
+                                <button class="btn btn-primary btn-small js-ajax-submit" type="submit">排序</button>
+                            </div>
+                            <table class="table table-hover" id="menus-table">
+                                <thead>
+                                    <tr>
+                                        <th>排序</th>
+                                        <th width="60">ID</th>
+                                        <th>平台</th>
+                                        <th>市场名称</th>
+                                        <th>市场标识</th>
+                                        <th>市场类型</th>
+                                        <th>交易币种</th>
+                                        <th>结算货币</th>
+                                        <th>更新时间</th>
+                                        <!-- <th>状态</th>                -->
+                                        <th width="150">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <php> $type_name = array('1'=>'币币交易','2'=>'合约交易'); </php>
+
+                                    <eq name="datas" value="">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                        <else />
+
+                                        <foreach name="datas" item="vo">
+
+                                            <tr>
+                                                <td style='padding-left:20px;'>
+                                                    <input name='sort[{$vo.id}]' type='text' size='3' value='{$vo.sort}'
+                                                        class='input input-order'>
+                                                </td>
+                                                <td>{$vo.id} </td>
+                                                <td>{$vo.platform} </td>
+                                                <td>{$vo.market_name} </td>
+                                                <td>{$vo.market} </td>
+                                                <td>{$type_name[$vo.type]} </td>
+                                                <td>{$vo.stock} </td>
+                                                <td>{$vo.money}</td>
+                                                <td>{$vo.update_time|date="Y-m-d H:i",###}</td>
+                                                <!-- <td>
+                            <eq name="vo.status" value="1">
+                                <span class="label label-info" onclick="checktag('{$vo.id}','status','0')">已启用</span>&nbsp;&nbsp;&nbsp;
+                            <else />
+                                <span class="label label-default" onclick="checktag('{$vo.id}','status','1')">已禁用</span>&nbsp;&nbsp;&nbsp;
+                            </eq>
+                        </td> -->
+                                                <td>
+                                                    <a href="{:url('Third/editMarket',['id'=> $vo.id  ]  )}">修改</a> |
+                                                    <a href="{:url('Third/delMarket',['id'=> $vo.id  ]  )}"
+                                                        class="js-ajax-delete">删除</a>
+                                                </td>
+                                            </tr>
+                                        </foreach>
+                                    </eq>
+                                </tbody>
+                            </table>
+
+
+
+                            <div class="pagination">
+                                <div>
+                                    当前共有数据 <span style="color:blue;font-weight:bold">{$num}</span> 条
+                                </div>
+                                {$page|default=''}
+
+                            </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        function checktag(id, tag, type) {
+            $.ajax({
+                url: "{:url('Third/uptag')}",
+                type: "post",
+                data: { id: id, tag: tag, type: type },
+                success: function (data) {
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

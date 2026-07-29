@@ -1,0 +1,54 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>编辑用户信息</h5>
+                    <div class="ibox-tools">
+                        <a href="#" class="btn btn-primary btn-xs">编辑用户信息</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('AdminIndex/editUserPost')}">
+
+                        
+                        <div class="form-group">
+                            <label for="inputmax_count" class="col-sm-2 control-label">谷歌验证</label>
+                            <div class="col-md-6 col-sm-10">
+                                <php>
+                                	$kaiqi = '';
+                                	$guanbi = '';
+                                	if($is_google_check == 1){
+                                		$kaiqi = 'checked="checked"';
+                                	}else{
+                                		$guanbi = 'checked="checked"';
+                                	}
+                                </php>
+                                
+                                
+                                <input name="is_google_check" type="radio" value="0" {$guanbi} />关闭 &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input name="is_google_check" type="radio" value="1" {$kaiqi} />开启
+                                <p class="help-block"></p>
+                            </div>
+                        </div>  
+                        
+                        
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <input type="hidden" name="id" value="{$id}">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+                                <a class="btn btn-default" href="{:url('AdminIndex/index')}">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

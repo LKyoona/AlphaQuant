@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Neuranet production backup every day
+
+[Timer]
+OnCalendar=*-*-* 03:20:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=300
+Unit=lhqb-backup.service
+
+[Install]
+WantedBy=timers.target

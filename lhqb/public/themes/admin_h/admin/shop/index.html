@@ -1,0 +1,135 @@
+<include file="public@header"/>
+<style>
+	.label{
+		cursor: pointer;
+	}
+    .tips{
+        display: none;
+        position: fixed;
+        top: 40%;
+        left: 40%;
+        min-width: 200px;
+        max-width: 700px;
+        transform: translate(-50%,-50%);
+        z-index: 99999;
+        text-align: center;
+        padding: 15px;
+        border-radius: 5px;
+        color:black;
+        background-color: #f2dede;
+        border-color: #d6e9c6;
+    }
+    .edits{
+        cursor:pointer;
+        color:coral;
+    }
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>商品列表</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">商品列表</a>
+                            <a href="{:url('Shop/add')}" class="btn btn-primary btn-xs">添加商品</a>
+                        </div>
+                    </div>
+
+
+<div class="ibox-content">
+        <div class="tips"></div><!-- 提示框 -->
+<form class="js-ajax-form" action="{:url('Shop/listorderss')}" method="post">
+    <div class="table-actions">
+        <button class="btn btn-primary btn-small js-ajax-submit" type="submit">排序</button>
+    </div>
+<table class="table table-hover" id="menus-table">
+    <thead>
+        <tr>
+                <th>排序</th>
+            <th width="40">ID</th>
+            <th>商品名称</th>
+            <th>商品描述</th>
+            <th>兑换币种</th>
+            <th>兑换汇率</th>
+            <th>总额度/剩余额度</th>
+            <th>用户最大兑换积分数量</th>
+            <th>参与人数</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>商品状态</th>
+            <th width="150">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <eq name="datas" value="">
+                <tr>
+                    <td colspan="5" style="text-align: center">暂无数据</td>
+                </tr>
+        <else />
+            <foreach name="datas" item="vo">
+                <tr>
+                    <td style='padding-left:20px;'>
+                        <input name='sort[{$vo.id}]' type='text' size='3' value='{$vo.sort}' class='input input-order'>
+                    </td>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.good_title}</td>
+                    <td>{$vo.good_description}    </td>
+                    <td>{$vo.coin_symbol}    </td>
+                    <td>{$vo.exchange_rate|floatval}</td>
+                    <td>{$vo.total_amount|floatval}/{$vo.left_amount|floatval}</td>
+                    <td>{$vo.single_user_amount|floatval}</td>
+                    <td>
+                            {$vo.join_num}
+                    </td>
+                    <td>
+                        <php> echo date("Y-m-d H:i:s",$vo['start_time'])</php>
+                    </td>
+                    <td>
+                        <php> echo date("Y-m-d H:i:s",$vo['end_time'])</php>
+                    </td>
+                    <td>
+                        <eq name="vo.status" value="1">
+                            <span class="label label-info" onclick="checktag('{$vo.id}','status','0')">正常</span>&nbsp;&nbsp;&nbsp;
+                        <else />
+                            <span class="label label-default" onclick="checktag('{$vo.id}','status','1')">已下架</span>&nbsp;&nbsp;&nbsp;
+                        </eq>
+                    </td>
+                    <td>
+                    <a href="{:url('Shop/edits',['id'=> $vo.id  ]  )}">修改</a> |
+                    <a href="{:url('Shop/del',['id'=> $vo.id  ]  )}" class="js-ajax-delete">删除</a>
+                    </td>
+                </tr>
+            </foreach>
+    </eq>
+    </tbody>
+</table>
+</div>
+<div class="pagination"></div>
+</form>
+
+                    </div>
+                </div>
+        </div>
+    </div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function checktag(id,tag,type){
+        $.ajax({
+            url:"{:url('Shop/uptag')}",
+            type:"post",
+            data:{id:id,tag:tag,type:type},
+            success:function(data){
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+            }
+        })
+    }
+</script>
+</body>
+</html>

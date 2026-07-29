@@ -1,0 +1,61 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>用户积分奖励</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">用户积分奖励</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <table class="table table-hover" id="menus-table">
+                            <thead>
+                                <tr>
+                                    <th width="60">ID</th>
+                                    <th width="100">用户ID</th>
+                                    <th>用户</th>
+                                    <th>用户操作名称</th>
+                                    <th>更改积分</th>
+                                    <th>更改金币</th>               
+                                    <th>创建时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <eq name="datas" value="">
+                                        <tr> 
+                                            <td colspan="5" style="text-align: center">暂无数据</td>
+                                        </tr>
+                                <else />
+                                    <foreach name="datas" item="vo">
+                                        <tr>
+                                            <td> {$vo.id} </td>
+                                            <td> {$vo.user_id} </td>
+                                            <td>{$vo.uname} </td>
+                                            <td>{$vo.action}</td>
+                                            <td>{$vo.score}</td>
+                                            <td>{$vo.coin}</td>
+                                            <td>{$vo.create_time|date="Y-m-d H:i",###}</td>
+                                        </tr>
+                                    </foreach>
+                                </eq>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <div>
+                                当前共有数据 <span style="color:blue;font-weight:bold">{$num}</span> 条
+                            </div>
+                            {$page|default=''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

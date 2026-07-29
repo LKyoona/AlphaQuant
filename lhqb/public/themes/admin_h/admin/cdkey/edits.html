@@ -1,0 +1,58 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>修改</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('Cdkey/index')}" class="btn btn-primary btn-xs active">激活码列表</a>
+                        <a href="{:url('Cdkey/edits')}" class="btn btn-primary btn-xs">修改激活码信息</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('Cdkey/editpost')}" method="post">
+
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>激活码</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-keys" name="keys" value="{$good_data.keys}">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <input type="hidden" name="id" value="{$good_data.id}" />                                
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('EDIT')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        $('input[name="coin_type"]').val()  == "coin" ? $('#show_token').hide() :  $('#show_token').show();;
+
+            $('input[name="coin_type"]').change(function() {
+                var val = $(this).val();
+                if( val == "coin"){
+                    $('#show_token').hide();
+                }else{
+                    $('#show_token').show();
+                }
+            })
+
+        </script>
+    </body>
+    </html>

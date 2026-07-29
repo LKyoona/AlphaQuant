@@ -1,0 +1,36 @@
+<svg width="162" height="79" viewBox="0 0 162 79" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="12" y1="10" x2="150" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B2512"/>
+      <stop offset="1" stop-color="#65401D"/>
+    </linearGradient>
+    <linearGradient id="gold2" x1="42" y1="18" x2="125" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF1CA"/>
+      <stop offset="0.52" stop-color="#F1C978"/>
+      <stop offset="1" stop-color="#BA7B2D"/>
+    </linearGradient>
+    <linearGradient id="goldLine" x1="74" y1="24" x2="126" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8E4"/>
+      <stop offset="1" stop-color="#F0C46E" stop-opacity="0.58"/>
+    </linearGradient>
+  </defs>
+  <rect width="162" height="79" rx="12" fill="url(#bg2)"/>
+  <circle cx="136" cy="10" r="38" fill="#F0C46E" fill-opacity="0.22"/>
+  <circle cx="24" cy="68" r="26" fill="#D59A46" fill-opacity="0.18"/>
+  <rect x="23" y="16" width="48" height="47" rx="8" fill="#3A2411" stroke="#D8A255" stroke-opacity="0.8" stroke-width="1.5"/>
+  <path d="M33 28H60" stroke="#FFE4A7" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M33 35H56" stroke="#EDBE65" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M33 42H61" stroke="#EDBE65" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M33 49H51" stroke="#EDBE65" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M98 53L107 43L115 47L127 31" stroke="url(#goldLine)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="98" cy="53" r="3.4" fill="#FFE19A"/>
+  <circle cx="107" cy="43" r="3.4" fill="#FFE19A"/>
+  <circle cx="115" cy="47" r="3.4" fill="#FFE19A"/>
+  <circle cx="127" cy="31" r="3.4" fill="#FFE19A"/>
+  <rect x="88" y="21" width="48" height="40" rx="10" fill="url(#gold2)" fill-opacity="0.2" stroke="#E4B968" stroke-opacity="0.9" stroke-width="1.5"/>
+  <path d="M96 57V49" stroke="#FFD989" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M106 57V38" stroke="#FFD989" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M116 57V44" stroke="#FFD989" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M126 57V33" stroke="#FFD989" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M90 18H136" stroke="#F6D899" stroke-opacity="0.18" stroke-width="2" stroke-linecap="round"/>
+</svg>

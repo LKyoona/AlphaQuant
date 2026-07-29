@@ -1,0 +1,30 @@
+{
+  "name": "quant-h5",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "set NODE_OPTIONS=--no-deprecation&& nuxt dev --host 192.168.109.143 --port 8888",
+    "dev:all": "set NODE_OPTIONS=--no-deprecation&& nuxt dev --host 0.0.0.0 --port 8888",
+    "build": "set NODE_OPTIONS=--no-deprecation&& nuxt build",
+    "start": "node .output/server/index.mjs",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "core-js": "^3.39.0",
+    "nuxt": "^4.4.8",
+    "qrcode.vue": "^3.6.0",
+    "qs": "^6.9.6",
+    "vant": "^4.9.24",
+    "vue": "^3.5.38",
+    "vue-clipboard3": "^2.0.0",
+    "vue-i18n": "^11.4.6",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "eslint": "^9.17.0",
+    "less": "^4.2.1",
+    "tailwindcss": "^3.4.19"
+  }
+}

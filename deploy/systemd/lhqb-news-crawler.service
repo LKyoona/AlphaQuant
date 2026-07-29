@@ -1,0 +1,24 @@
+[Unit]
+Description=NeuraNet CoinDesk news crawler
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/data/lhqb/current/python/news_crawler
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=NEWS_CRAWLER_ENV_FILE=/data/lhqb/shared/python/news-crawler.env
+Environment=NEWS_CRAWLER_PYTHON=/data/lhqb/shared/python/venvs/news-crawler/bin/python
+ExecStart=/data/lhqb/current/python/news_crawler/run.sh
+StandardOutput=append:/data/lhqb/logs/crawler/news-crawler.log
+StandardError=append:/data/lhqb/logs/crawler/news-crawler.log
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/data/lhqb/logs/crawler
+
+[Install]
+WantedBy=multi-user.target

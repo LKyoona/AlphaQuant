@@ -1,0 +1,108 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('Exchange/index')}" class="btn btn-primary btn-xs active">闪兑列表</a>
+                        <a href="{:url('Exchange/add')}" class="btn btn-primary btn-xs">添加闪兑</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('Exchange/adddata')}" method="post">
+
+            
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>原币种</label>
+                            <div class="col-sm-6">
+                                <select  class="form-control" name="from_coin" >
+                                    <foreach name="coin" item="vo">
+                                        <option value="{$vo.coin_symbol}">{$vo.coin_symbol}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>兑换币种</label>
+                            <div class="col-sm-6">
+                                <select  class="form-control" name="to_coin" >
+                                    <foreach name="coin" item="vo">
+                                        <option value="{$vo.coin_symbol}">{$vo.coin_symbol}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>兑换汇率 </label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-rate" name="rate" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最小兑换数量</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-min_amount" name="min_amount" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最大兑换数量 </label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-max_amount" name="max_amount" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>锁定汇率，交易最大时长（秒）</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-max_duration" name="max_duration" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                       
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('ADD')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script >
+    //    function check(){
+    //         var aaa=$('#from_coin').val();
+    //         var bbb=$('#to_coin').val();
+    //         if(aaa == bbb){
+                
+    //         }
+    //     }
+    
+    </script>
+
+    </body>
+    </html>

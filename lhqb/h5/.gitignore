@@ -1,0 +1,86 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+# Logs
+
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+
+coverage
+.nyc_output
+
+# Build
+
+lib-cov
+build/Release
+dist
+.nuxt
+.output/
+.next
+.vuepress/dist
+
+# Dependencies
+
+node_modules/
+jspm_packages/
+bower_components
+typings/
+
+# Cache
+
+.npm
+.cache
+.eslintcache
+
+# History
+
+.node_repl_history
+
+# Package
+
+*.tgz
+.yarn-integrity
+
+# Environment
+
+.env
+.env.*
+!.env.example
+
+# Serverless
+
+.serverless
+
+# IDE
+
+.idea/
+.vscode/
+
+# System
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Service Worker
+
+sw.*
+
+# Vim
+
+*.swp
+
+# Misc
+
+.lock-wscript

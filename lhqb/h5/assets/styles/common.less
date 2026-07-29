@@ -1,0 +1,403 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+  min-height: 100dvh;
+}
+html {
+  --app-vh: 1vh;
+  --bottom-nav-height: 82px;
+}
+
+@supports (height: 100dvh) {
+  html {
+    --app-vh: 1dvh;
+  }
+}
+html {
+  font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  word-spacing: 1px;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top left, rgba(246, 204, 113, 0.14), transparent 24%),
+    radial-gradient(circle at 84% 10%, rgba(161, 118, 39, 0.1), transparent 18%),
+    linear-gradient(180deg, #050402 0%, #110d07 42%, #181108 100%);
+  color: #f7ecd2;
+}
+
+body,
+#__nuxt,
+#__layout,
+.page {
+  min-height: 100%;
+  min-height: 100dvh;
+  min-height: calc(var(--app-vh, 1vh) * 100);
+  background: transparent;
+  color: inherit;
+}
+
+.van-nav-bar,
+.topimg,
+.page-header {
+  margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .van-nav-bar,
+  .topimg,
+  .page-header {
+    margin-top: 20px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+// 页面切换动画
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active,
+.page-enter-active,
+.page-leave-active {
+  transition: opacity .18s ease, transform .22s cubic-bezier(.22,1,.36,1);
+  will-change: transform, opacity;
+}
+
+.slide-left-enter-from,
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translate3d(14px, 0, 0);
+}
+
+.slide-left-leave-to,
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0);
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.van-nav-bar {
+  background:
+    linear-gradient(180deg, rgba(31, 22, 12, 0.96) 0%, rgba(16, 11, 6, 0.98) 100%) !important;
+}
+
+.van-nav-bar__title,
+.van-nav-bar .van-icon,
+.van-nav-bar__text {
+  color: #fff1cf !important;
+  font-weight: 800;
+  text-shadow: 0 0 16px rgba(241, 205, 134, 0.2), 0 1px 0 rgba(0, 0, 0, 0.55);
+}
+
+.van-nav-bar::after {
+  border-color: rgba(217, 176, 92, 0.14) !important;
+}
+
+.van-cell-group {
+  background:
+    linear-gradient(180deg, rgba(28, 20, 10, 0.96) 0%, rgba(18, 12, 6, 0.98) 100%) !important;
+}
+
+.van-popup,
+.van-dialog {
+  background:
+    linear-gradient(180deg, rgba(28, 20, 10, 0.98) 0%, rgba(18, 12, 6, 1) 100%) !important;
+  color: #f0e3c5;
+}
+
+.van-dialog {
+  border: 1px solid rgba(217, 176, 92, 0.18);
+  border-radius: 16px !important;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(246, 204, 113, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(28, 20, 10, 0.98) 0%, rgba(18, 12, 6, 1) 100%) !important;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.38);
+}
+
+.van-dialog__header {
+  color: #fff1cf;
+}
+
+.van-dialog__message,
+.van-dialog__content {
+  color: #f0e3c5;
+}
+
+.van-dialog__message {
+  padding: 30px 24px;
+  color: #fff1cf !important;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.van-dialog__footer {
+  border-top: 1px solid rgba(217, 176, 92, 0.14);
+  background: rgba(12, 9, 5, 0.96);
+}
+
+.van-dialog__footer::after,
+.van-dialog__cancel::after,
+.van-dialog__confirm::after {
+  border-color: rgba(217, 176, 92, 0.12) !important;
+}
+
+.van-dialog__cancel,
+.van-dialog__confirm {
+  height: 52px;
+  background: transparent !important;
+  color: #f0e3c5 !important;
+  font-weight: 700;
+}
+
+.van-dialog__confirm {
+  color: #f0c46e !important;
+}
+
+.van-overlay {
+  background: rgba(0, 0, 0, 0.46) !important;
+}
+
+.van-pull-refresh,
+.van-list,
+.van-list__finished-text,
+.van-empty {
+  background: transparent !important;
+  color: rgba(240, 227, 197, 0.56) !important;
+}
+
+.van-tag--primary {
+  border: 1px solid rgba(236, 197, 117, 0.28);
+  background: rgba(236, 197, 117, 0.12) !important;
+  color: #ffefc8 !important;
+}
+
+// Keep account settings consistent with the application's dark-gold theme.
+.settings-page {
+  min-height: 100dvh;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 92% 8%, rgba(239, 190, 91, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(25, 17, 9, 0.98), rgba(9, 7, 4, 0.98));
+  color: #fff1cf;
+}
+
+.settings-page .van-cell-group,
+.settings-page .van-form {
+  overflow: hidden;
+  margin: 16px 12px 0;
+  border: 1px solid rgba(217, 176, 92, 0.28);
+  border-radius: 16px;
+  background: rgba(24, 16, 8, 0.88) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+}
+
+.settings-page .van-cell,
+.settings-page .van-field {
+  min-height: 52px;
+  color: #fff1cf !important;
+  background: rgba(24, 16, 8, 0.94) !important;
+}
+
+.settings-page .van-cell__title,
+.settings-page .van-cell__value,
+.settings-page .van-field__label,
+.settings-page .van-field__control,
+.settings-page .van-field__control::placeholder,
+.settings-page .van-field__button,
+.settings-page .van-cell__right-icon {
+  color: #f6dfae !important;
+}
+
+.settings-page .van-cell__value {
+  color: rgba(246, 223, 174, 0.68) !important;
+}
+
+.settings-page .van-cell::after,
+.settings-page .van-field::after {
+  border-color: rgba(217, 176, 92, 0.16) !important;
+}
+
+.settings-page .van-button--primary,
+.settings-page .van-button--info,
+.settings-page .submit,
+.settings-page .btn .van-button {
+  border: 1px solid #e5b95f !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #8c5d20, #f1ca77) !important;
+  color: #1b1207 !important;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(187, 132, 38, 0.2);
+}
+
+.settings-page .btn {
+  margin: 20px 12px;
+}
+
+.settings-page .van-popup,
+.settings-page .van-picker {
+  color: #fff1cf;
+  background: #171008 !important;
+}
+
+.settings-page .van-picker__toolbar,
+.settings-page .van-picker-column__item {
+  color: #f6dfae;
+}
+
+.settings-page .van-picker__confirm,
+.settings-page .van-picker__cancel {
+  color: #f0c46e;
+}
+
+.settings-page .van-password-input__item {
+  border: 1px solid rgba(217, 176, 92, 0.38);
+  border-radius: 8px;
+  background: rgba(35, 24, 12, 0.95);
+  color: #fff1cf;
+}
+
+.settings-page .tips,
+.settings-page .forget-pwd {
+  color: #f6dfae;
+}
+
+.settings-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(calc(100vw - 32px), 420px) !important;
+  margin: 0 !important;
+  border: 1px solid rgba(227, 182, 79, 0.18) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at top, rgba(246, 204, 113, 0.12), transparent 42%),
+    linear-gradient(180deg, #20150b 0%, #120c07 100%) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+.settings-dialog .van-dialog__header {
+  padding-top: 22px;
+  color: #e7c36d !important;
+  font-weight: 600;
+  background: transparent;
+}
+
+.settings-dialog .van-dialog__content {
+  padding: 18px 18px 24px;
+  color: #f3dca1 !important;
+  background: transparent !important;
+}
+
+.settings-dialog .van-dialog__message {
+  color: #f3dca1 !important;
+  line-height: 1.6;
+}
+
+.settings-dialog .van-cell-group,
+.settings-dialog .van-cell,
+.settings-dialog .van-field {
+  background: transparent !important;
+}
+
+.settings-dialog .van-cell::after {
+  display: none;
+}
+
+.settings-dialog .van-field {
+  padding: 0;
+}
+
+.settings-dialog .van-field__body {
+  min-height: 64px;
+  padding: 0 20px;
+  border: 1px solid rgba(231, 195, 109, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(42, 28, 14, 0.96), rgba(24, 16, 9, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.settings-dialog .van-field__label,
+.settings-dialog .van-field__control,
+.settings-dialog .van-field__control::placeholder,
+.settings-dialog .van-textarea__control,
+.settings-dialog .van-textarea__control::placeholder {
+  color: #f3dca1 !important;
+  font-size: 16px;
+}
+
+.settings-dialog .van-dialog__footer {
+  background: rgba(10, 7, 4, 0.78);
+}
+
+.settings-dialog .van-dialog__footer::before,
+.settings-dialog .van-dialog__confirm::after,
+.settings-dialog .van-dialog__cancel::after {
+  border-color: rgba(227, 182, 79, 0.12) !important;
+}
+
+.settings-dialog .van-dialog__footer .van-button {
+  font-weight: 600;
+  background: transparent !important;
+}
+
+.settings-dialog .van-dialog__footer .van-button--default {
+  color: #bca06b !important;
+}
+
+.settings-dialog .van-dialog__footer .van-button--primary {
+  color: #f1d690 !important;
+  border-color: rgba(227, 182, 79, 0.18) !important;
+}
+
+.settings-dialog .van-field__button .van-button {
+  color: #2c1c0d !important;
+  background: linear-gradient(135deg, #f4d486, #ddb04b) !important;
+  border: none !important;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .settings-page .van-cell-group,
+  .settings-page .van-form {
+    max-width: 760px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .settings-page .btn {
+    max-width: 760px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

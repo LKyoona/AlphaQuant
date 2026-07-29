@@ -1,0 +1,114 @@
+<include file="public@header" />
+
+
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>机器人订单</h5>
+                        <div class="ibox-tools">
+                            <a href="#" class="btn btn-primary btn-xs active">机器人订单</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <form class="well form-inline margin-top-20" method="post" action="{:url('Quant/revenue')}">
+
+                            平台：
+                            <input class="form-control" type="text" name="platform" style="width: 200px;"
+                                value="{:input('request.platform')}" placeholder="请输入平台,如:okex">
+                            机器人ID：
+                            <input class="form-control" type="text" name="qrobot_id" style="width: 200px;"
+                                value="{:input('request.qrobot_id')}" placeholder="请输入机器人ID">
+                            用户：
+                            <input class="form-control" type="text" name="uid" style="width: 200px;"
+                                value="{:input('request.uid')}" placeholder="请输入用户ID,如:800001">
+                            <input type="submit" class="btn btn-primary" value="搜索" />
+                            <a class="btn btn-danger" href="{:url('Quant/revenue')}">清空</a>
+                            
+                            <br><br>当前检索结果 总数量: <span style="color:red">{$total_amount}</span> 
+                        </form>
+                        <table class="table table-hover" id="menus-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>平台</th>
+                                    <th>用户ID</th>
+                                    <th>机器人ID</th>
+                                    <th>进程ID</th>
+                                    <th>类型</th>
+                                    <th>市场</th>
+                                    <th>交易币种</th>
+                                    <th>结算币种</th>
+                                    <th>收益</th>
+                                    <th>时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <php> $type_name = array(''=>'','1'=>'币币交易','2'=>'合约交易'); </php>
+
+                                <eq name="datas" value="">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center">暂无数据</td>
+                                    </tr>
+                                    <else />
+
+                                    <foreach name="datas" item="vo">
+
+                                        <tr>
+                                            <td>{$vo.id} </td>
+                                            <td>{$vo.platform} </td>
+                                            <td>{$vo.uid} </td>
+                                            <td>{$vo.qrobot_id} </td>
+                                            <td>{$vo.pid} </td>
+                                            <td>{$type_name[$vo.type]} </td>
+                                            <td>{$vo.market} </td>
+                                            <td>{$vo.stock} </td>
+                                            <td>{$vo.money} </td>
+                                            <td>{$vo.revenue} {$vo.money}</td>
+                                            <td>{$vo.ctime}</td>
+                                        </tr>
+                                    </foreach>
+                                </eq>
+                            </tbody>
+                        </table>
+
+
+
+                        <div class="pagination">
+                            <div>
+                                当前共有数据 <span style="color:blue;font-weight:bold">{$num}</span> 条
+                            </div>
+                            {$page|default=''}
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+        function checktag(id, tag, type) {
+            $.ajax({
+                url: "{:url('Third/uptag')}",
+                type: "post",
+                data: { id: id, tag: tag, type: type },
+                success: function (data) {
+
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();
+                    document.location.reload();
+
+
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

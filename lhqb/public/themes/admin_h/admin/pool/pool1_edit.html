@@ -1,0 +1,53 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>月度分红</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('pool/index')}" class="btn btn-primary btn-xs active">股权日志</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('pool/revenue_post1')}" method="post">
+  
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>最大可分红数量</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-total" name="total" value="{$pool_balance}" required="required" disabled>
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>请输入分红数量</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-num" name="num" value="" required="required" >
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('提交')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+       
+            
+        </script>
+    </body>
+    </html>

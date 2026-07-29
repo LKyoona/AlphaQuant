@@ -1,0 +1,136 @@
+# 本地运行缓存与临时发布包
+data/runtime/
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
+# =========================
+
+# 构建与发布目录
+
+# =========================
+
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+build/
+dist/
+
+# =========================
+
+# Python
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyo
+
+*.egg
+*.egg-info/
+.eggs/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+
+# IDE / 编辑器
+
+# =========================
+
+.vscode/
+.idea/
+.settings/
+
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+
+# 日志与运行时文件
+
+# =========================
+
+*.log
+*.pid
+*.pid.lock
+
+# =========================
+
+# 临时文件与备份文件
+
+# =========================
+
+*.tmp
+*.temp
+*.bak
+*.old
+*.swp
+*.swo
+*~
+
+# =========================
+
+# 系统文件
+
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+
+# 可执行文件与安装包
+
+# =========================
+
+*.swf
+*.air
+*.ipa
+*.apk
+
+# =========================
+
+# 本地配置与敏感配置
+
+# =========================
+
+.user.ini
+.env
+.env.*
+!.env.example
+
+# =========================
+
+# 不忽略的项目配置文件
+
+# =========================
+
+# .project
+
+# .actionScriptProperties
+
+# .flexProperties
+
+#
+
+# 上述 Eclipse / Flash Builder 配置文件包含项目编译设置，
+
+# 因此不应加入忽略规则。

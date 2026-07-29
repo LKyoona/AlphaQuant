@@ -1,0 +1,67 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>用户实盘付费管理</h5>
+                    <div class="ibox-tools">
+                        <a href="#" class="btn btn-primary btn-xs">编辑用户操作</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('AdminIndex/editPost')}">
+
+                        <div class="form-group">
+                            <label for="input-is_free" class="col-sm-2 control-label">是否开启付费订阅</label>
+                            <div class="col-md-6 col-sm-10">
+                                <php> 
+                                    $is_open_selected = $is_free == 0 ? 'selected' : '';
+                                    $is_close_selected = $is_free == 1 ? 'selected' : '';
+                                </php>
+                                <select name="is_free" id="input-is_free" class="form-control">
+                                    <option value="0" {$is_open_selected} >开启</option>
+                                    <option value="1" {$is_close_selected}>关闭</option>
+                                </select>
+                                <p class="help-block">开启后，关注订阅需要收费</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-subscribe_coin_symbol" class="col-sm-2 control-label">付费币种</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="text" class="form-control" id="input-subscribe_coin_symbol" name="subscribe_coin_symbol" value="{$subscribe_coin_symbol}">
+                                <p class="help-block">扣费币种 BTC ETH 等</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-subscribe_price" class="col-sm-2 control-label">付费价格</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="text" class="form-control" id="input-subscribe_price" name="subscribe_price" value="{$subscribe_price|floatval}">
+                                <p class="help-block"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-subscribe_days" class="col-sm-2 control-label">订阅天数</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="text" class="form-control" id="input-subscribe_days" name="subscribe_days" value="{$subscribe_days}">
+                                <p class="help-block"></p>
+                            </div>
+                        </div>                        
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <input type="hidden" name="id" value="{$uid}">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+                                <a class="btn btn-default" href="{:url('AdminIndex/firm')}">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<include file="public@header"/>
+<style>
+.agent-filter { padding: 14px 16px; margin: 15px 0 20px; border: 1px solid #e7eaec; border-radius: 7px; background: #f8fafc; }
+.agent-table-wrap { overflow-x: auto; }
+.agent-table-wrap table { min-width: 1280px; }
+.agent-login { min-width: 150px; }
+.agent-password { min-width: 150px; }
+.status-open { color: #18a689; font-weight: 700; }
+.status-closed { color: #999; }
+.credential-card { margin-bottom: 20px; padding: 18px; border: 1px solid #18a689; border-radius: 8px; background: #f0fff9; }
+.credential-card h4 { margin-top: 0; color: #087f6b; }
+.credential-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 10px; }
+.credential-value { min-width: 230px; padding: 9px 12px; border: 1px solid #b7e4d6; border-radius: 5px; background: #fff; font-family: Consolas, monospace; font-size: 15px; }
+</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>代理后台开通</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('user/index')}" class="btn btn-primary btn-xs">管理员列表</a>
+                        <a href="{:url('rbac/index')}" class="btn btn-default btn-xs">角色管理</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="alert alert-info">
+                        首次开通会自动生成随机后台用户名和密码，并只展示一次。代理不能自行修改后台凭据，后续由超级管理员在此页面修改或重置。
+                    </div>
+                    <notempty name="credentials">
+                        <div class="credential-card">
+                            <h4>代理后台凭据已生成，请立即记录</h4>
+                            <div>用户ID：{$credentials.user_id}</div>
+                            <div class="credential-row">
+                                <span>后台用户名</span>
+                                <span class="credential-value" id="generated-agent-login">{$credentials.admin_login}</span>
+                                <button type="button" class="btn btn-default btn-sm" onclick="copyCredential('generated-agent-login')">复制用户名</button>
+                            </div>
+                            <div class="credential-row">
+                                <span>后台密码</span>
+                                <span class="credential-value" id="generated-agent-password">{$credentials.admin_pass}</span>
+                                <button type="button" class="btn btn-default btn-sm" onclick="copyCredential('generated-agent-password')">复制密码</button>
+                            </div>
+                        </div>
+                    </notempty>
+                    <form class="agent-filter form-inline" method="get" action="{:url('user/agentAccess')}">
+                        <input type="text" name="keyword" class="form-control" style="width:300px;" value="{$keyword}"
+                               placeholder="用户ID / 手机 / 昵称 / 邀请码">
+                        <button type="submit" class="btn btn-primary">搜索代理</button>
+                        <a href="{:url('user/agentAccess')}" class="btn btn-default">清空</a>
+                    </form>
+
+                    <div class="agent-table-wrap">
+                        <table class="table table-hover table-bordered">
+                            <thead>
+                            <tr>
+                                <th>用户ID</th>
+                                <th>用户信息</th>
+                                <th>邀请码</th>
+                                <th>直属邀请数</th>
+                                <th>上级ID</th>
+                                <th>后台状态</th>
+                                <th>后台用户名</th>
+                                <th>后台密码</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <foreach name="users" item="vo">
+                                <php>$isOpened=in_array((int)$vo['id'],$openedUserIds,true);</php>
+                                <tr>
+                                    <td>{$vo.id}</td>
+                                    <td>
+                                        <div>{$vo.user_nickname|default='-'}</div>
+                                        <small>{$vo.mobile|default=$vo.user_login}</small>
+                                    </td>
+                                    <td>{$vo.invitation_code|default='-'}</td>
+                                    <td>{$vo.invitation_count|default=0}</td>
+                                    <td>{$vo.parent_user_id|default='-'}</td>
+                                    <td>
+                                        <if condition="$isOpened">
+                                            <span class="status-open">已开通</span>
+                                            <else/>
+                                            <span class="status-closed">未开通</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$isOpened">
+                                            <input form="agent-form-{$vo.id}" name="admin_login" class="form-control agent-login"
+                                                   value="{$vo.admin_login}" placeholder="后台用户名">
+                                            <else/>
+                                            <span class="text-muted">开通时随机分配</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <if condition="$isOpened">
+                                            <input form="agent-form-{$vo.id}" type="text" name="admin_pass"
+                                                   class="form-control agent-password" placeholder="留空保持原密码">
+                                            <else/>
+                                            <span class="text-muted">开通时随机分配</span>
+                                        </if>
+                                    </td>
+                                    <td>
+                                        <form id="agent-form-{$vo.id}" method="post" class="js-ajax-form"
+                                              action="{:url('user/agentAccessPost')}">
+                                            <input type="hidden" name="id" value="{$vo.id}">
+                                            <input type="hidden" name="action_type" value="enable">
+                                            <button type="submit" class="btn btn-primary btn-sm js-ajax-submit">
+                                                <if condition="$isOpened">保存账号<else/>随机开通</if>
+                                            </button>
+                                        </form>
+                                        <if condition="$isOpened">
+                                            <form method="post" class="js-ajax-form" style="display:inline-block;"
+                                                  action="{:url('user/agentAccessPost')}">
+                                                <input type="hidden" name="id" value="{$vo.id}">
+                                                <input type="hidden" name="action_type" value="disable">
+                                                <button type="submit" class="btn btn-danger btn-sm js-ajax-submit"
+                                                        data-msg="确定关闭该代理的后台权限吗？">关闭后台</button>
+                                            </form>
+                                        </if>
+                                    </td>
+                                </tr>
+                            </foreach>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">{$page|default=''}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+function copyCredential(elementId) {
+    var element = document.getElementById(elementId);
+    if (!element) {
+        return;
+    }
+    var value = element.textContent || element.innerText;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value);
+    } else {
+        var input = document.createElement('input');
+        input.value = value;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+    }
+}
+</script>
+</body>
+</html>

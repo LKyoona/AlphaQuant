@@ -1,0 +1,102 @@
+<include file="public@header"/>
+<style>
+.home_info li em {
+	float: left;
+	width: 120px;
+	font-style: normal;
+}
+li {
+	list-style: none;
+    margin:3px;
+}
+.w-left {
+    width:40%;
+    float:left;
+    margin-left:5%
+}
+.btn-lg{
+    font-size: 16px
+}
+.w-right {
+    width:40%;
+    float:right;
+    margin-right:10%
+}
+.tips{
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 40%;
+    min-width: 200px;
+    max-width: 700px;
+    transform: translate(-50%,-50%);
+    z-index: 99999;
+    text-align: center;
+    padding: 15px;
+    border-radius: 5px;
+    color:black;
+    background-color: #f2dede;
+    border-color: #d6e9c6;
+    }
+.edits{
+    cursor:pointer;
+    color:coral;
+}
+</style>
+</head>
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="tips"></div><!-- 提示框 -->
+        <h4 class="well">当前共有<span style="color:red"> {$count} </span>条大V认证信息</h4>
+
+	<div>
+        <foreach name="data" item="vo">
+           <if condition="$key%2==0"><div style="clear:both"><else /></if>
+            <div <if condition="$key%2==0"> class="wrap w-left" <else /> class="wrap w-right"</if> >
+                <h4 class="well">第<span style="color:red"> {$key+1} </span>条申请信息</h4>
+                <div class="home_info">
+
+    
+                        <ul>
+                            <li><em>用户ID：</em> <span>{$vo.uid}</span>&nbsp;&nbsp;</li>
+                            <li><em>用户昵称：</em> <span>{$vo.user_nickname}</span>&nbsp;&nbsp;</li>
+                            <li><em>联系电话：</em> <span>{$vo.mobile}</span>&nbsp;&nbsp;</li>
+                            <li><em>申请人姓名：</em> <span>{$vo.real_name}</span>&nbsp;&nbsp;</li>
+                            <li><em>申请头衔:</em> <span>{$vo.v_title}</span>&nbsp;&nbsp;</li>
+                            <li><em>申请理由:</em> <span>{$vo.v_reason}</span>&nbsp;&nbsp;</li>
+                        </ul>
+
+                    <div style="text-align:center">
+                        <span class="label label-info btn-lg" name="{$vo.id}" style="cursor:pointer"  title="{$vo.id}" onclick="ajaxupdate(this,'1')"> 通过</span>  
+                        <span class="label label-success btn-lg" name="{$vo.id}"  style="cursor:pointer"  title="{$vo.id}" onclick="ajaxupdate(this,'-1')">拒绝</span>
+                    </div>
+                </div>
+            </div>
+            <if condition="$key%2==1"></div> <else /></if>
+        </foreach>
+    </div>
+    <script src="__PUBLIC__/js/common.js"></script>
+    <script>
+        function ajaxupdate(datas,type){
+            var id=datas.title;
+            // console.log(datas);
+            console.log(id);console.log(type);
+            $.ajax({
+                url:"{:url('UserAuth/vupdate') }",
+                type:"post",
+                data:{ids:id,types:type},
+                success:function(data){
+                    console.log(data);
+                    $('.tips').text(data).fadeIn().delay(1500).fadeOut();   
+                    document.location.reload();
+                },
+                error:function (error){
+                    console.log(error);
+                }
+            })
+        }
+    
+    </script>
+    </body>
+</body>
+</html>

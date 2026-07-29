@@ -1,0 +1,79 @@
+<include file="public@header" />
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>添加套餐</h5>
+                        <div class="ibox-tools">
+                            <a href="{:url('Cdkey/package')}" class="btn btn-primary btn-xs active">套餐列表</a>
+                            <a href="{:url('Cdkey/addpack')}" class="btn btn-primary btn-xs">添加套餐</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <form class="form-horizontal js-ajax-form" action="{:url('Cdkey/editposttpack')}" method="post">
+
+                            <input type="hidden" name="id" value="{$data['id']}">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="form-required">*</span>会员套餐名称</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="input-package_name" name="package_name" value="{$data['package_name']}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span
+                                        class="form-required">*</span>周期(天)</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="input-period" name="period" value="{$data['period']}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span
+                                        class="form-required">*</span>价格USDT</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="input-price" name="price" value="{$data['price']}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="form-required">*</span>状态</label>
+                                <div class="col-sm-6">
+                                    <input name="status" value="1" type="radio" 
+                                    <eq name="data.status" value="1">checked</eq>
+                                      >是 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input name="status" value="0" type="radio" 
+                                    <eq name="data.status" value="0">checked</eq>
+                                    >否
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-6">
+                                    <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('ADD')}</button>
+                                    <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script>
+    </body >
+    </html >

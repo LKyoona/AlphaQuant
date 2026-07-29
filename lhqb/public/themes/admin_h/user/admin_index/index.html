@@ -1,0 +1,1434 @@
+<include file="public@header" />
+<style>
+	body.gray-bg {
+		background: #f5f6f8;
+		color: #303846;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif
+	}
+
+	.user-page {
+		padding: 12px
+	}
+
+	.user-panel {
+		margin: 0;
+		border: 1px solid #e3e7ed;
+		border-radius: 8px;
+		background: #fff;
+		box-shadow: 0 2px 8px rgba(16, 24, 40, .045);
+		overflow: hidden
+	}
+
+	.user-panel .ibox-title {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 44px;
+		padding: 0 14px;
+		border: 0;
+		border-bottom: 1px solid #e8ebef;
+		background: linear-gradient(180deg, #fff 0%, #fcfdff 100%)
+	}
+
+	.user-panel .ibox-title h5 {
+		float: none;
+		margin: 0;
+		color: #252b36;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 44px
+	}
+
+	.user-panel .ibox-tools {
+		position: static;
+		float: none;
+		margin: 0
+	}
+
+	.user-panel .ibox-tools .btn {
+		height: 26px;
+		margin: 0;
+		padding: 3px 8px;
+		border-radius: 5px;
+		font-size: 11px;
+		line-height: 18px;
+		box-shadow: none
+	}
+
+	.user-panel .ibox-content {
+		padding: 0;
+		border: 0;
+		background: #fff
+	}
+
+	.user-filter {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 8px 12px;
+		margin: 0;
+		padding: 8px 12px;
+		border-bottom: 1px solid #e8ebef;
+		background: #fafbfc
+	}
+
+	.filter-item {
+		display: flex;
+		align-items: center;
+		flex: 0 1 auto;
+		gap: 6px;
+		min-width: 0;
+		margin: 0
+	}
+
+	.filter-item label {
+		flex: 0 0 auto;
+		margin: 0;
+		color: #667085;
+		font-size: 12px;
+		font-weight: 500;
+		white-space: nowrap
+	}
+
+	.filter-item .form-control {
+		width: clamp(130px, 14vw, 210px);
+		height: 30px;
+		margin: 0;
+		padding: 4px 8px;
+		border: 1px solid #d4d9e1;
+		border-radius: 5px;
+		color: #344054;
+		font-size: 12px;
+		background: #fff;
+		box-shadow: none;
+		transition: border-color .15s, box-shadow .15s
+	}
+
+	.filter-item.filter-keyword {
+		flex: 1 1 300px
+	}
+
+	.filter-item.filter-keyword .form-control {
+		width: clamp(220px, 28vw, 440px);
+		max-width: 100%
+	}
+
+	.filter-item .form-control:hover {
+		border-color: #b8c0cc
+	}
+
+	.filter-item .form-control:focus {
+		border-color: #5d8dee;
+		box-shadow: 0 0 0 2px rgba(47, 111, 237, .08)
+	}
+
+	.filter-actions {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-left: 2px
+	}
+
+	.filter-actions .btn {
+		height: 30px;
+		margin: 0;
+		padding: 4px 10px;
+		border-radius: 5px;
+		font-size: 11px;
+		line-height: 20px;
+		box-shadow: none
+	}
+
+	.filter-actions .btn i {
+		margin-right: 3px
+	}
+
+	.filter-actions .btn-primary {
+		border-color: #2f6fed;
+		background: #2f6fed
+	}
+
+	.filter-actions .btn-primary:hover,
+	.filter-actions .btn-primary:focus {
+		border-color: #245fcf;
+		background: #245fcf
+	}
+
+	.filter-actions .btn-default {
+		border-color: #d4d9e1;
+		color: #596273;
+		background: #fff
+	}
+
+	.filter-actions .btn-default:hover,
+	.filter-actions .btn-default:focus {
+		border-color: #b8c0cc;
+		color: #344054;
+		background: #f7f8fa
+	}
+
+	.user-table-wrap {
+		position: relative;
+		width: 100%;
+		overflow: auto;
+		border: 0;
+		background: #fff;
+		scrollbar-width: thin;
+		scrollbar-color: #c9ced6 transparent
+	}
+
+	.user-table-wrap::-webkit-scrollbar {
+		width: 8px;
+		height: 8px
+	}
+
+	.user-table-wrap::-webkit-scrollbar-thumb {
+		border: 2px solid transparent;
+		border-radius: 8px;
+		background: #c9ced6;
+		background-clip: padding-box
+	}
+
+	.user-table {
+		width: 100%;
+		margin: 0 !important;
+		border: 0 !important;
+		table-layout: auto
+	}
+
+	.user-table>thead>tr>th {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		height: 36px;
+		padding: 0 9px;
+		border-width: 0 0 1px !important;
+		border-color: #e1e5ea !important;
+		color: #667085;
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 36px;
+		white-space: nowrap;
+		background: #f7f8fa;
+		box-shadow: 0 1px 0 rgba(16, 24, 40, .02)
+	}
+
+	.user-table>tbody>tr>td {
+		padding: 8px 9px;
+		border-width: 0 0 1px !important;
+		border-color: #edf0f3 !important;
+		vertical-align: middle;
+		color: #475467;
+		font-size: 12px;
+		line-height: 1.4;
+		background: #fff;
+		transition: background .12s
+	}
+
+	.user-table>tbody>tr:hover>td {
+		background: #f8faff
+	}
+
+	.user-table>tbody>tr:last-child>td {
+		border-bottom: 0 !important
+	}
+
+	/* 列宽由 table-layout:auto 根据内容和容器空间动态计算。 */
+	.col-id,
+	.col-user,
+	.col-contact,
+	.col-activity,
+	.col-balance,
+	.col-invite,
+	.col-status,
+	.col-actions {
+		width: auto
+	}
+
+	.user-table>tbody>tr>td:first-child {
+		white-space: nowrap
+	}
+
+	.user-table>tbody>tr>td:nth-child(2),
+	.user-table>tbody>tr>td:nth-child(3),
+	.user-table>tbody>tr>td:nth-child(4),
+	.user-table>tbody>tr>td:nth-child(5) {
+		max-width: clamp(170px, 19vw, 320px)
+	}
+
+	.id-number {
+		display: block;
+		color: #344054;
+		font-size: 12px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums
+	}
+
+	.parent-id {
+		display: flex;
+		align-items: baseline;
+		gap: 4px;
+		margin-top: 3px;
+		font-size: 10px;
+		line-height: 1.35;
+		white-space: nowrap
+	}
+
+	.parent-id-label {
+		color: #98a2b3
+	}
+
+	.parent-id-value {
+		color: #667085;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums
+	}
+
+	.user-profile {
+		display: flex;
+		align-items: center;
+		min-width: 0
+	}
+
+	.user-avatar {
+		flex: 0 0 30px;
+		width: 30px;
+		height: 30px;
+		margin-right: 8px;
+		border: 1px solid #e1e5ea;
+		border-radius: 50%;
+		object-fit: cover;
+		background: #f2f4f7
+	}
+
+	.user-main {
+		min-width: 0
+	}
+
+	.user-login {
+		display: block;
+		overflow: hidden;
+		color: #252b36;
+		font-size: 12px;
+		font-weight: 600;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.user-nickname {
+		display: block;
+		overflow: hidden;
+		margin-top: 2px;
+		color: #7b8492;
+		font-size: 11px;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.contact-line,
+	.activity-line {
+		display: flex;
+		align-items: flex-start;
+		min-width: 0;
+		margin-bottom: 3px;
+		font-size: 11px;
+		line-height: 1.35
+	}
+
+	.contact-line:last-child,
+	.activity-line:last-child {
+		margin-bottom: 0
+	}
+
+	.info-label {
+		flex: 0 0 34px;
+		color: #98a2b3
+	}
+
+	.info-value {
+		min-width: 0;
+		overflow: hidden;
+		color: #596273;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.exchange-card {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas: "main query" "message message";
+		align-items: center;
+		gap: 3px 7px;
+		min-height: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent
+	}
+
+	.exchange-top {
+		grid-area: main;
+		min-width: 0
+	}
+
+	.exchange-amount {
+		display: block;
+		overflow: hidden;
+		color: #101828;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.25;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums
+	}
+
+	.exchange-unit {
+		margin-left: 3px;
+		color: #98a2b3;
+		font-size: 10px;
+		font-weight: 500
+	}
+
+	.exchange-meta {
+		overflow: hidden;
+		margin-top: 3px;
+		color: #7b8492;
+		font-size: 10px;
+		line-height: 1.3;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.exchange-query-btn {
+		grid-area: query;
+		height: 23px;
+		margin: 0;
+		padding: 0 6px;
+		border: 1px solid #d4d9e1;
+		border-radius: 4px;
+		color: #475467;
+		font-size: 10px;
+		font-weight: 500;
+		line-height: 21px;
+		white-space: nowrap;
+		background: #fff;
+		transition: border-color .15s, color .15s, background .15s
+	}
+
+	.exchange-query-btn:hover,
+	.exchange-query-btn:focus {
+		border-color: #9bb5ea;
+		color: #2f6fed;
+		outline: 0;
+		background: #f6f9ff
+	}
+
+	.exchange-query-btn:active {
+		background: #eef4ff
+	}
+
+	.exchange-query-btn[disabled] {
+		opacity: .6;
+		cursor: not-allowed
+	}
+
+	.exchange-query-msg {
+		grid-area: message;
+		min-height: 15px;
+		overflow: hidden;
+		margin: 0;
+		color: #98a2b3;
+		font-size: 10px;
+		line-height: 15px;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.exchange-query-msg.is-loading {
+		color: #9a6700
+	}
+
+	.exchange-query-msg.is-success {
+		color: #16803c
+	}
+
+	.exchange-query-msg.is-error {
+		color: #d92d20
+	}
+
+	.invite-count {
+		display: block;
+		color: #273142;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.2;
+		font-variant-numeric: tabular-nums
+	}
+
+	.invite-source {
+		display: inline-flex;
+		align-items: center;
+		max-width: clamp(110px, 12vw, 180px);
+		margin-top: 3px;
+		padding: 2px 6px;
+		border: 1px solid #eadfcb;
+		border-radius: 0;
+		color: #8a6a2f;
+		font-size: 10px;
+		line-height: 1.2;
+		background: #fbf7ef
+	}
+
+	.invite-source-label {
+		flex: 0 0 auto;
+		margin-right: 4px;
+		color: #aa8a51
+	}
+
+	.invite-source-code {
+		display: inline-block;
+		min-width: 0;
+		overflow: hidden;
+		color: #6f4b12;
+		font-weight: 600;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums
+	}
+
+	.invite-meta {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 6px 8px
+	}
+
+	.invite-count-inline {
+		color: #273142;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.2;
+		font-variant-numeric: tabular-nums
+	}
+
+	.invite-sub-link {
+		display: inline-flex;
+		align-items: center;
+		height: 22px;
+		margin-top: 6px;
+		padding: 0 7px;
+		border: 1px solid #d6e2f5;
+		border-radius: 0;
+		line-height: 20px;
+		background: #f7faff
+	}
+
+	.invite-link {
+		display: inline-block;
+		margin-top: 3px;
+		color: #2f6fed;
+		font-size: 10px;
+		white-space: nowrap
+	}
+
+	.invite-link:hover {
+		border-color: #a9c0eb;
+		color: #245fcf;
+		text-decoration: none;
+		background: #eef4ff
+	}
+
+	.status-badge {
+		display: inline-flex;
+		align-items: center;
+		height: 22px;
+		padding: 0 7px;
+		border: 1px solid transparent;
+		border-radius: 11px;
+		font-size: 10px;
+		font-weight: 500;
+		white-space: nowrap
+	}
+
+	.status-badge:before {
+		display: inline-block;
+		width: 5px;
+		height: 5px;
+		margin-right: 5px;
+		border-radius: 50%;
+		content: ""
+	}
+
+	.status-0 {
+		border-color: #f7d5d2;
+		color: #b42318;
+		background: #fff8f7
+	}
+
+	.status-0:before {
+		background: #f04438
+	}
+
+	.status-1 {
+		border-color: #cfe8d7;
+		color: #157a38;
+		background: #f7fcf8
+	}
+
+	.status-1:before {
+		background: #22a559
+	}
+
+	.status-2 {
+		border-color: #f0dfb6;
+		color: #946200;
+		background: #fffaf0
+	}
+
+	.status-2:before {
+		background: #eaaa08
+	}
+
+	.user-actions {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: nowrap;
+		gap: 2px;
+		white-space: nowrap
+	}
+
+	.user-actions a {
+		margin: 0 !important
+	}
+
+	.action-link,
+	.action-disabled {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 23px;
+		padding: 0 5px;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		color: #475467;
+		font-size: 10px;
+		line-height: 21px;
+		white-space: nowrap;
+		background: transparent;
+		transition: border-color .12s, color .12s, background .12s
+	}
+
+	.action-link:hover,
+	.action-link:focus {
+		border-color: #d7e2f8;
+		color: #2f6fed;
+		text-decoration: none;
+		outline: 0;
+		background: #f5f8ff
+	}
+
+	.action-danger {
+		color: #b42318
+	}
+
+	.action-danger:hover,
+	.action-danger:focus {
+		border-color: #f5d4d0;
+		color: #d92d20;
+		background: #fff7f6
+	}
+
+	.action-disabled {
+		color: #b8c0cc !important;
+		cursor: not-allowed
+	}
+
+	.action-simulate {
+		color: #175cd3
+	}
+
+	.action-simulate:hover,
+	.action-simulate:focus {
+		border-color: #cfddfa;
+		color: #1849a9;
+		background: #f3f7ff
+	}
+
+	.pagination {
+		margin: 0;
+		padding: 10px 14px;
+		border-top: 1px solid #e6e9ed;
+		text-align: right;
+		background: #fff
+	}
+
+	.pagination ul {
+		margin: 0
+	}
+
+	.pagination>li>a,
+	.pagination>li>span,
+	.pagination li>a,
+	.pagination li>span {
+		min-width: 30px;
+		height: 30px;
+		padding: 5px 9px;
+		font-size: 12px;
+		line-height: 18px
+	}
+
+	.empty-text {
+		color: #b8c0cc
+	}
+
+	.query-spinner {
+		display: inline-block;
+		width: 9px;
+		height: 9px;
+		margin-right: 4px;
+		border: 2px solid rgba(71, 84, 103, .2);
+		border-top-color: #475467;
+		border-radius: 50%;
+		vertical-align: -1px;
+		animation: spin .7s linear infinite
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg)
+		}
+	}
+
+
+	/* 仅优化用户表格结构与字段展示，不影响筛选、分页及业务逻辑 */
+	.user-table {
+		min-width: 1380px;
+		border-collapse: separate;
+		border-spacing: 0;
+		table-layout: auto
+	}
+
+	.user-table>thead>tr>th {
+		height: 44px;
+		padding: 0 14px;
+		border-bottom: 1px solid #dfe4ea !important;
+		color: #344054;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 44px;
+		letter-spacing: .02em;
+		background: linear-gradient(180deg, #fafbfc 0%, #f2f4f7 100%);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 1px 2px rgba(16, 24, 40, .04)
+	}
+
+	.user-table>thead>tr>th:not(:last-child) {
+		border-right: 1px solid #e5e9ef !important
+	}
+
+	.user-table>tbody>tr>td {
+		padding: 13px 14px;
+		border-bottom: 1px solid #e9edf2 !important;
+		line-height: 1.5
+	}
+
+	.user-table>tbody>tr>td:not(:last-child) {
+		border-right: 1px solid #f0f2f5 !important
+	}
+
+	.user-table>tbody>tr:nth-child(even)>td {
+		background: #fbfcfe
+	}
+
+	.user-table>tbody>tr:hover>td {
+		background: #f4f7fd
+	}
+
+	.col-id {
+		min-width: 115px
+	}
+
+	.col-user {
+		min-width: 185px
+	}
+
+	.col-contact {
+		min-width: 235px
+	}
+
+	.col-activity {
+		min-width: 210px
+	}
+
+	.col-balance {
+		min-width: 265px
+	}
+
+	.col-invite {
+		min-width: 175px
+	}
+
+	.col-status {
+		min-width: 90px
+	}
+
+	.col-actions {
+		min-width: 155px
+	}
+
+	.user-table>thead>tr>th:nth-child(7),
+	.user-table>thead>tr>th:nth-child(8),
+	.user-table>tbody>tr>td:nth-child(7),
+	.user-table>tbody>tr>td:nth-child(8) {
+		text-align: center
+	}
+
+	.id-number {
+		color: #1d2939;
+		font-size: 13px;
+		font-weight: 700
+	}
+
+	.parent-id {
+		display: inline-flex;
+		align-items: center;
+		margin-top: 6px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		background: #f2f4f7
+	}
+
+	.parent-id-label {
+		color: #98a2b3
+	}
+
+	.parent-id-value {
+		color: #475467
+	}
+
+	.user-avatar {
+		flex-basis: 34px;
+		width: 34px;
+		height: 34px;
+		margin-right: 10px
+	}
+
+	.user-login {
+		color: #1d2939;
+		font-size: 13px;
+		font-weight: 600
+	}
+
+	.user-nickname {
+		margin-top: 3px;
+		color: #7b8492;
+		font-size: 11px
+	}
+
+	.contact-line,
+	.activity-line {
+		margin-bottom: 5px;
+		font-size: 12px;
+		line-height: 1.45
+	}
+
+	.info-label {
+		flex-basis: 38px;
+		color: #98a2b3;
+		font-size: 11px;
+		font-weight: 500
+	}
+
+	.info-value {
+		color: #475467;
+		font-size: 12px
+	}
+
+	.exchange-card {
+		padding: 8px 10px;
+		border: 1px solid #e6eaf0;
+		border-radius: 7px;
+		background: #fbfcfe
+	}
+
+	.exchange-amount {
+		color: #1d2939;
+		font-size: 15px;
+		font-weight: 700
+	}
+
+	.exchange-meta {
+		margin-top: 4px;
+		color: #7b8492;
+		font-size: 11px
+	}
+
+	.exchange-query-msg {
+		font-size: 11px
+	}
+
+	.invite-count-inline {
+		color: #1d2939;
+		font-size: 16px;
+		font-weight: 700
+	}
+
+	.invite-source {
+		margin-top: 0;
+		padding: 3px 7px
+	}
+
+	.invite-link {
+		margin-top: 6px;
+		font-size: 11px
+	}
+
+	.status-badge {
+		height: 24px;
+		padding: 0 9px;
+		border-radius: 12px;
+		font-size: 11px
+	}
+
+	.user-actions {
+		justify-content: center;
+		gap: 5px
+	}
+
+	.action-link,
+	.action-disabled {
+		height: 26px;
+		padding: 0 8px;
+		border-color: #e4e7ec;
+		border-radius: 5px;
+		font-size: 11px;
+		line-height: 24px;
+		background: #fff
+	}
+
+	.action-danger {
+		border-color: #f5d4d0;
+		background: #fff8f7
+	}
+
+	.action-simulate {
+		border-color: #cfddfa;
+		background: #f5f8ff
+	}
+
+	.action-disabled {
+		border-color: #eaecf0;
+		background: #f9fafb
+	}
+
+	@media(max-width:768px) {
+		.user-page {
+			padding: 7px
+		}
+
+		.user-panel .ibox-title {
+			min-height: 42px;
+			padding: 0 10px
+		}
+
+		.user-panel .ibox-title h5 {
+			font-size: 14px;
+			line-height: 42px
+		}
+
+		.user-filter {
+			display: block;
+			padding: 10px 12px
+		}
+
+		.filter-item {
+			display: block;
+			margin: 0 0 8px
+		}
+
+		.filter-item label {
+			margin-bottom: 4px
+		}
+
+		.filter-item .form-control,
+		.filter-item.filter-keyword .form-control {
+			width: 100%
+		}
+
+		.filter-actions {
+			width: 100%;
+			justify-content: flex-end;
+			margin: 0
+		}
+
+		.filter-actions .btn {
+			flex: 0 0 auto
+		}
+
+		.user-table>thead>tr>th,
+		.user-table>tbody>tr>td {
+			padding-left: 8px;
+			padding-right: 8px
+		}
+
+		.user-table>tbody>tr>td:nth-child(2),
+		.user-table>tbody>tr>td:nth-child(3),
+		.user-table>tbody>tr>td:nth-child(4),
+		.user-table>tbody>tr>td:nth-child(5) {
+			max-width: 260px
+		}
+
+		.pagination {
+			padding: 9px 12px
+		}
+	}
+
+
+
+	/* 交易所余额字段紧凑优化：无卡片、无额外占位 */
+	.exchange-card {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas: "main query" "message message";
+		align-items: start;
+		gap: 2px 8px;
+		min-height: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none
+	}
+
+	.exchange-top {
+		grid-area: main;
+		min-width: 0
+	}
+
+	.exchange-top>div {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: baseline;
+		column-gap: 7px;
+		row-gap: 2px;
+		min-width: 0
+	}
+
+	.exchange-top>div>.exchange-meta:first-child {
+		grid-column: 1;
+		margin: 0;
+		color: #667085;
+		font-size: 10px;
+		font-weight: 600;
+		line-height: 18px;
+		white-space: nowrap
+	}
+
+	.exchange-top>div>.exchange-meta:first-child:before {
+		display: none;
+		content: none
+	}
+
+	.exchange-amount {
+		grid-column: 2;
+		margin: 0;
+		color: #175cd3;
+		font-size: 14px;
+		font-weight: 700;
+		line-height: 18px;
+		white-space: nowrap
+	}
+
+	.exchange-unit {
+		margin-left: 3px;
+		color: #7b8492;
+		font-size: 9px;
+		font-weight: 600
+	}
+
+	.exchange-top>div>.exchange-meta:not(:first-child) {
+		grid-column: 1 / -1;
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		min-height: 16px;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		color: #7b8492;
+		font-size: 10px;
+		line-height: 16px;
+		background: transparent
+	}
+
+	.exchange-top>div>.exchange-meta:not(:first-child):before {
+		flex: 0 0 auto;
+		width: 4px;
+		height: 4px;
+		margin-right: 6px;
+		border-radius: 50%;
+		background: #98a2b3;
+		content: ""
+	}
+
+	.js-exchange-withdrawable {
+		color: #475467 !important
+	}
+
+	.js-exchange-withdrawable:before {
+		background: #2f6fed !important
+	}
+
+	.exchange-query-btn {
+		grid-area: query;
+		height: 22px;
+		margin: 0;
+		padding: 0 7px;
+		border: 1px solid #d6deeb;
+		border-radius: 4px;
+		color: #475467;
+		font-size: 10px;
+		font-weight: 500;
+		line-height: 20px;
+		white-space: nowrap;
+		background: #fff;
+		box-shadow: none
+	}
+
+	.exchange-query-btn:hover,
+	.exchange-query-btn:focus {
+		border-color: #9bb5ea;
+		color: #175cd3;
+		background: #f7f9ff
+	}
+
+	.exchange-query-msg {
+		grid-area: message;
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		min-height: 16px;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		color: #7b8492;
+		font-size: 10px;
+		line-height: 16px;
+		background: transparent
+	}
+
+	.exchange-query-msg:before {
+		flex: 0 0 auto;
+		width: 4px;
+		height: 4px;
+		margin-right: 6px;
+		border-radius: 50%;
+		background: #98a2b3;
+		content: ""
+	}
+
+	.exchange-query-msg.is-loading {
+		color: #9a6700;
+		background: transparent
+	}
+
+	.exchange-query-msg.is-loading:before {
+		background: #eaaa08
+	}
+
+	.exchange-query-msg.is-success {
+		color: #157a38;
+		background: transparent
+	}
+
+	.exchange-query-msg.is-success:before {
+		background: #22a559
+	}
+
+	.exchange-query-msg.is-error {
+		color: #b42318;
+		background: transparent
+	}
+
+	.exchange-query-msg.is-error:before {
+		background: #f04438
+	}
+
+	/* 第五版：余额绿色强调，邀请数量与渠道拆列。 */
+	.exchange-amount,
+	.exchange-amount .exchange-unit {
+		color: #16803c
+	}
+
+	.js-exchange-withdrawable {
+		color: #16803c !important;
+		font-weight: 600
+	}
+
+	.js-exchange-withdrawable:before {
+		background: #22a559 !important
+	}
+
+	.col-invite-count {
+		width: 92px;
+		text-align: center
+	}
+
+	.invite-count-cell {
+		width: 92px;
+		text-align: center;
+		white-space: nowrap
+	}
+
+	.invite-count-cell .invite-count-inline {
+		display: block;
+		margin: 0 0 5px;
+		font-size: 15px;
+		line-height: 18px
+	}
+
+	.invite-count-cell .invite-sub-link {
+		display: inline-flex;
+		margin-top: 0
+	}
+
+	.col-invite {
+		min-width: 120px
+	}
+
+</style>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInUp js-check-wrap user-page">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="ibox float-e-margins user-panel">
+					<div class="ibox-title">
+						<h5>用户管理</h5>
+						<div class="ibox-tools">
+							<a href="{:url('AdminIndex/invitationManagement')}"
+								class="btn btn-info btn-xs">分享码管理</a>
+						</div>
+					</div>
+					<div class="ibox-content">
+						<form class="user-filter" method="post" action="{:url('user/adminIndex/index')}">
+							<div class="filter-item"><label>用户ID</label><input class="form-control" type="text"
+									name="uid" value="{:input('request.uid')}" placeholder="请输入用户ID"></div>
+							<div class="filter-item filter-keyword"><label>关键字</label><input class="form-control"
+									type="text" name="keyword" value="{:input('request.keyword')}"
+									placeholder="用户名 / 昵称 / 邮箱 / 手机号"></div>
+							<div class="filter-actions"><button type="submit" class="btn btn-primary"><i
+										class="fa fa-search"></i> 搜索</button><a class="btn btn-default"
+									href="{:url('user/adminIndex/index')}"><i class="fa fa-refresh"></i> 重置</a></div>
+						</form>
+						<form class="js-ajax-form" action="" method="post">
+							<div class="user-table-wrap">
+								<table class="table table-hover table-list user-table">
+									<thead>
+										<tr>
+											<th class="col-id">ID / 推荐人</th>
+											<th class="col-user">用户信息</th>
+											<th class="col-contact">联系方式</th>
+											<th class="col-activity">登录信息</th>
+											<th class="col-balance">交易所余额</th>
+											<th class="col-invite-count">邀请数量</th>
+											<th class="col-invite">邀请渠道</th>
+											<th class="col-status">状态</th>
+											<th class="col-actions">操作</th>
+										</tr>
+									</thead>
+									<php>
+										$user_statuses=array("0"=>lang('USER_STATUS_BLOCKED'),"1"=>lang('USER_STATUS_ACTIVATED'),"2"=>lang('USER_STATUS_UNVERIFIED'));
+									</php>
+									<tbody>
+										<foreach name="list" item="vo">
+											<tr data-user-id="{$vo.id}">
+												<td><span class="id-number" title="用户 ID：{$vo.id}">#{$vo.id}</span><span
+															class="parent-id" title="推荐人 ID：{$vo.parent_user_id|default='-'}"><span
+																class="parent-id-label">推荐人</span><span
+																class="parent-id-value">{$vo.parent_user_id|default='-'}</span></span>
+												</td>
+												<td>
+													<div class="user-profile">
+														<empty name="$vo['avatar']"><img class="user-avatar"
+																src="__STATIC__/images/headicon.png">
+															<else /><a
+																href="javascript:parent.imagePreviewDialog('{:cmf_get_image_url($vo['avatar'])}')"><img
+																	class="user-avatar"
+																	src="{:cmf_get_image_url($vo['avatar'])}"></a>
+														</empty>
+														<div class="user-main"><span
+																class="user-login">{$vo['user_login']?$vo['user_login']:($vo['mobile']?$vo['mobile']:lang('THIRD_PARTY_USER'))}</span><span
+																class="user-nickname">昵称：{$vo['user_nickname']?$vo['user_nickname']:lang('NOT_FILLED')}</span>
+														</div>
+													</div>
+												</td>
+												<td>
+													<div class="contact-line"><span class="info-label">邮箱</span><span
+															class="info-value" title="{$vo.user_email|default='-'}">{$vo.user_email|default='-'}</span></div>
+													<div class="contact-line"><span class="info-label">手机</span><span
+															class="info-value" title="{$vo.mobile|default='-'}">{$vo.mobile|default='-'}</span></div>
+												</td>
+												<td>
+													<div class="activity-line"><span class="info-label">注册</span><span
+															class="info-value">{:date('Y-m-d
+															H:i',$vo['create_time'])}</span></div>
+													<div class="activity-line"><span class="info-label">登录</span><span
+															class="info-value">{:date('Y-m-d
+															H:i',$vo['last_login_time'])}</span></div>
+													<div class="activity-line"><span class="info-label">IP</span><span
+															class="info-value"
+															title="{$vo.last_login_ip}">{$vo.last_login_ip|default='-'}</span>
+													</div>
+												</td>
+												<td>
+													<php>
+														$exchangeBalance=isset($exchangeBalanceMap[$vo['id']])?$exchangeBalanceMap[$vo['id']]:[];$exchangeApiCount=isset($exchangeApiStatsMap[$vo['id']])?$exchangeApiStatsMap[$vo['id']]:0;
+													</php>
+													<div class="exchange-card">
+														<div class="exchange-top">
+															<div>
+																<div class="exchange-meta">总资产</div>
+																<strong
+																	class="exchange-amount js-exchange-balance-value"
+																	data-uid="{$vo.id}">
+																	<if
+																		condition="isset($exchangeBalance['total_assets_usd'])">
+																										{$exchangeBalance.total_assets_usd|default='0'}
+																		<else />-
+																	</if><span class="exchange-unit">USDT</span>
+																									</strong>
+																									<div class="exchange-meta js-exchange-withdrawable" data-uid="{$vo.id}">可提现资金：- USDT</div>
+																<div class="exchange-meta">授权API：{$exchangeApiCount} 个
+																	<if
+																		condition="!empty($exchangeBalance['platform'])">
+																		· {$exchangeBalance.platform}</if>
+																</div>
+															</div>
+														</div>
+														<if condition="$exchangeApiCount gt 0"><button type="button"
+																class="exchange-query-btn js-query-exchange-balance"
+																data-uid="{$vo.id}">实时查询</button>
+															<div class="exchange-query-msg js-exchange-query-msg"
+																data-uid="{$vo.id}" title="默认展示历史余额">默认展示历史余额</div>
+															<else />
+															<div class="exchange-query-msg">暂无有效授权API</div>
+														</if>
+													</div>
+												</td>
+												<td class="invite-count-cell">
+													<span class="invite-count-inline">{$vo.invitation_count|default='0'}</span>
+													<a class="invite-link invite-sub-link"
+														href="{:url('adminIndex/childs',array('uid'=>$vo['id']))}">查看三级邀请</a>
+												</td>
+												<td>
+													<span class="invite-source"><span class="invite-source-label">渠道</span>
+													<if condition="!empty($vo.source_invitation_code)">
+														<span class="invite-source-code">{$vo.source_invitation_code}</span>
+														<else />-
+													</if>
+													</span>
+												</td>
+												<td><span
+														class="status-badge status-{$vo.user_status}">{$user_statuses[$vo['user_status']]}</span>
+												</td>
+												<td>
+													<div class="user-actions">
+														<if
+															condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/ban') || cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/cancelBan')">
+															<neq name="vo.id" value="1">
+																<empty name="vo.user_status"><a
+																		href="{:url('adminIndex/cancelban',array('id'=>$vo['id']))}"
+																		class="action-link js-ajax-dialog-btn"
+																		data-msg="{:lang('ACTIVATE_USER_CONFIRM_MESSAGE')}">{:lang('ACTIVATE_USER')}</a>
+																	<else /><a
+																		href="{:url('adminIndex/ban',array('id'=>$vo['id']))}"
+																		class="action-link action-danger js-ajax-dialog-btn"
+																		data-msg="{:lang('BLOCK_USER_CONFIRM_MESSAGE')}">{:lang('BLOCK_USER')}</a>
+																</empty>
+																<else /><span
+																	class="action-link action-disabled">{:lang('BLOCK_USER')}</span>
+															</neq>
+														</if>
+														<if
+															condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/editUser')">
+															<a class="action-link"
+																href="{:url('adminIndex/editUser',array('id'=>$vo['id']))}">编辑</a>
+														</if>
+														<if
+															condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/simulateDisk')">
+															<a class="action-link action-simulate"
+																href="{:url('adminIndex/simulateDisk',array('id'=>$vo['id']))}">模拟盘</a>
+														</if>
+													</div>
+												</td>
+											</tr>
+										</foreach>
+									</tbody>
+								</table>
+							</div>
+							<div class="pagination">{$page|default=''}</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	<script>
+		$(document).on('click', '.js-query-exchange-balance', function() {
+			var $button = $(this),
+				uid = $button.data('uid'),
+				$row = $button.closest('tr'),
+				$msg = $row.find('.js-exchange-query-msg[data-uid="' + uid + '"]'),
+				$value = $row.find('.js-exchange-balance-value[data-uid="' + uid + '"]');
+			$button.prop('disabled', true).html('<span class="query-spinner"></span>查询中');
+			$msg.removeClass('is-success is-error').addClass('is-loading').text('正在连接交易所接口...').attr('title',
+				'正在连接交易所接口...');
+			$.ajax({
+				url: "{:url('AdminIndex/queryExchangeBalancePost')}",
+				type: 'post',
+				dataType: 'json',
+				data: {
+					uid: uid
+				},
+				success: function(res) {
+					if (res.code == 1) {
+						if (!res.data || res.data.total_assets == null || res.data.withdrawable == null) {
+							var invalidMsg = '余额数据异常，未返回可提现资金或总资产';
+							$msg.removeClass('is-loading is-success').addClass('is-error').text(invalidMsg)
+								.attr('title', invalidMsg);
+							return;
+						}
+						var total = res.data.total_assets,
+							withdrawable = res.data.withdrawable,
+							queryTime = res.data && res.data.query_time ? res.data.query_time : '刚刚',
+							successCount = res.data && res.data.success_count != null ? res.data
+							.success_count : 0,
+							apiCount = res.data && res.data.api_count != null ? res.data.api_count : 0,
+							msg = '更新于 ' + queryTime + ' · 成功 ' + successCount + '/' + apiCount;
+						$value.html(total + '<span class="exchange-unit">USDT</span>');
+						$row.find('.js-exchange-withdrawable[data-uid="' + uid + '"]').text('可提现资金：' + withdrawable + ' USDT');
+						$msg.removeClass('is-loading is-error').addClass('is-success').text(msg).attr(
+							'title', msg)
+					} else {
+						var errorMsg = res.msg || '查询失败';
+						$msg.removeClass('is-loading is-success').addClass('is-error').text(errorMsg)
+							.attr('title', errorMsg)
+					}
+				},
+				error: function() {
+					var errorMsg = '网络异常，查询失败';
+					$msg.removeClass('is-loading is-success').addClass('is-error').text(errorMsg).attr(
+						'title', errorMsg)
+				},
+				complete: function() {
+					$button.prop('disabled', false).text('实时查询')
+				}
+			})
+		});
+	</script>
+</body>
+</html>

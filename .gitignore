@@ -1,0 +1,65 @@
+# Local tooling and IDE files
+.agents/
+.codex/
+.idea/
+.vscode/
+**/.DS_Store
+**/Thumbs.db
+**/Desktop.ini
+
+# Dependencies and generated frontend output
+**/node_modules/
+**/.nuxt/
+**/.output/
+lhqb/public/app/
+
+# Runtime data and user uploads
+lhqb/data/runtime/
+lhqb/public/upload/
+logs/
+**/logs/
+*.log
+*.pid
+*.pid.lock
+
+# Private server configuration
+lhqb/data/conf/database.php
+lhqb/data/conf/email.php
+lhqb/python/db.conf
+quant_829.py
+quant_websocket.py
+redisop.py
+.env
+.env.*
+!.env.example
+
+# Temporary archives and local backups
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.rar
+*.tmp
+*.temp
+*.bak
+*.old
+*.swp
+*.swo
+*~
+
+# Python caches and virtual environments
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Build output
+dist/
+build/
+coverage/
+.cache/
+.npm/

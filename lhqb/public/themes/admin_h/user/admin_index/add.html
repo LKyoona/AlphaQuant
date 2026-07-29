@@ -1,0 +1,81 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>添加</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('adminIndex/index')}" class="btn btn-primary btn-xs">列表</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" action="{:url('adminIndex/add_post',['id'=>$data['id']])}" method="post">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>用户id</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="input-title" name="name" value="{$data.id}" disabled="disabled">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>余额</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" value="{$data.score}" name="score" placeholder="" disabled="disabled">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>操作</label>
+                            <div class="col-sm-6">
+                                <input name="type" type="radio" value="add" checked="checked"/>加币 &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input name="type" type="radio" value="reduce" />扣币
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>数量</label>
+                            <div class="col-sm-6">
+                                <input type="hidden" class="form-control" value="{$data.id}" name="id">
+                                <input type="number" class="form-control" value="" name="num" placeholder="请输入数量" required="请输入数量">
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>操作密码</label>
+                            <div class="col-sm-6">
+                                <input type="hidden" class="form-control" value="{$data.id}" name="id">
+                                <input type="password" class="form-control" value="" name="pwd" placeholder="请输入操作密码" required="请输入操作密码">
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed">
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">确认</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+<script type="application/javascript">
+    var id = 1;
+    function addinput(keywords){
+        id = keywords+id +1;
+        var str='<label class="control-label" id="'+id+'"></label><input type="text" class="form-control" name="'+keywords+'[]">';
+        $('#'+keywords).append(str);
+    }
+</script>
+    </body>
+    </html>

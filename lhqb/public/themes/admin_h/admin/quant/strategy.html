@@ -1,0 +1,98 @@
+<include file="public@header"/>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInUp js-check-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>策略设置</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal js-ajax-form" role="form" action="{:url('Quant/addcl')}" method="post">
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>做单数量</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="max_order_count" value="{$data.max_order_count}" required="required" >
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>止盈比例</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="stop_profit_rate" value="{$data.stop_profit_rate}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>止盈回调</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="stop_profit_callback_rate" value="{$data.stop_profit_callback_rate}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>每次补仓百分比</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="cover_rate" value="{$data.cover_rate}" required="required">
+                            </div>
+                        </div>
+                        <div class="hr-line-dashed">
+                        </div>
+                        
+                        <!--<volist name="$data['cover_rate']" id="vo" key="k">-->
+                        <!--    <div class="form-group">-->
+                        <!--        <label class="col-sm-2 control-label"><span class="form-required">*</span>第{$k}次补仓</label>-->
+                        <!--        <div class="col-sm-6">-->
+                        <!--            <input type="text" class="form-control"  name="cover_rate[{$k}]" value="{$vo}" required="required">-->
+                        <!--        </div>-->
+                        <!--    </div>-->
+                        <!--    <div class="hr-line-dashed">-->
+                        <!--    </div>-->
+                        <!--</volist>-->
+                        
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="form-required">*</span>补仓回调</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control"  name="cover_callback_rate" value="{$data.cover_callback_rate}"  required="required">
+                            </div>
+                        </div>
+                        
+                       
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-6">
+                                <button type="submit" class="btn btn-primary js-ajax-submits">{:lang('ADD')}</button>
+                                <a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+    <script src="__STATIC__/js/admin.js"></script>
+    <script >
+    function addinput(data){
+        var keywords=data;
+        var str='<div>参数名：<input type="text"   name="params_name[]">&nbsp;&nbsp;参数值：<input type="text" size="50" name="params[]"></div>';
+        $('#'+data).append(str);
+    }
+    var timeInput = $("input.currency");
+    if (timeInput.length) {
+        Wind.use('datePicker', function () {
+            timeInput.datePicker({
+                onlytime: true
+            });
+        });
+    }
+    </script>
+    </body>
+    </html>

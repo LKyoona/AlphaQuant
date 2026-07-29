@@ -1,0 +1,387 @@
+<include file="public@header"/>
+<style>
+.summary-card {
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e7eaec;
+    border-radius: 8px;
+    background: #fff;
+}
+.summary-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+}
+.summary-item {
+    min-width: 180px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+}
+.summary-item .label {
+    color: #666;
+    font-size: 12px;
+}
+.summary-item .value {
+    margin-top: 6px;
+    color: #111827;
+    font-size: 22px;
+    font-weight: 700;
+}
+.panel-block {
+    margin-bottom: 20px;
+}
+.hint-text {
+    margin-top: 8px;
+    color: #888;
+    font-size: 12px;
+}
+.simulate-result {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 24px;
+    left: 50%;
+    min-width: 280px;
+    max-width: calc(100% - 40px);
+    padding: 14px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    transform: translateX(-50%);
+}
+.simulate-result.success { background: #18a689; }
+.simulate-result.error { background: #ed5565; }
+.table-small td,
+.table-small th {
+    font-size: 12px;
+}
+</style>
+</head>
+<body class="gray-bg">
+<div id="simulate-result" class="simulate-result" role="alert"></div>
+<div class="wrapper wrapper-content animated fadeInUp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>模拟盘控制台</h5>
+                    <div class="ibox-tools">
+                        <a href="{:url('AdminIndex/index')}" class="btn btn-primary btn-xs">返回用户列表</a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="summary-card">
+                        <div><strong>当前用户：</strong>{$user.user_login|default=$user.mobile} (ID: {$user.id})</div>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="label">今日盈利</div>
+                                <div class="value">{$summary.today_revenue}</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="label">累计盈利</div>
+                                <div class="value">{$summary.total_revenue}</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="label">收益记录数</div>
+                                <div class="value">{$summary.record_count}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <if condition="empty($hasRobots)">
+                        <div class="panel-block">
+                            <div class="panel panel-warning">
+                                <div class="panel-heading">先创建一台模拟机器人</div>
+                                <div class="panel-body">
+                                    <p style="margin-bottom: 15px;color:#8a6d3b;">这个用户当前没有真实机器人。为了让 H5 收益页和机器人展示链路都正常工作，先创建一台“仅展示用”的模拟机器人，不会触发真实下单。</p>
+                                    <form method="post" class="form-horizontal js-ajax-form simulate-action" action="{:url('AdminIndex/simulateDiskPost')}">
+                                        <input type="hidden" name="id" value="{$user.id}">
+                                        <input type="hidden" name="action_type" value="create_virtual_robot">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">平台</label>
+                                            <div class="col-sm-3">
+                                                <select name="virtual_platform" class="form-control" id="virtual-platform-select">
+                                                    <option value="">请选择平台</option>
+                                                    <php>$platformUsed = [];</php>
+                                                    <foreach name="markets" item="market">
+                                                        <if condition="empty($platformUsed[$market['platform']])">
+                                                            <option value="{$market.platform}">{$market.platform}</option>
+                                                            <php>$platformUsed[$market['platform']] = 1;</php>
+                                                        </if>
+                                                    </foreach>
+                                                </select>
+                                            </div>
+                                            <label class="col-sm-2 control-label">交易对</label>
+                                            <div class="col-sm-3">
+                                                <select name="virtual_market_id" class="form-control" id="virtual-market-select">
+                                                    <option value="">请先选择平台</option>
+                                                    <foreach name="markets" item="market">
+                                                        <option value="{$market.id}" data-platform="{$market.platform}" style="display:none;">{$market.market_name} ({$market.stock}/{$market.money})</option>
+                                                    </foreach>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">首单展示额度</label>
+                                            <div class="col-sm-3">
+                                                <input type="text" name="virtual_first_order_value" class="form-control" value="300" placeholder="例如 300">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-10">
+                                                <button type="submit" class="btn btn-danger js-ajax-submit" data-success="simulateDiskSuccess">创建模拟机器人</button>
+                                                <p class="hint-text">创建后，这个用户就能像正常机器人用户一样挂收益、挂流水，前端也不再因为“无机器人”而直接返回 0。</p>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </if>
+
+                    <div class="panel-block">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">一键同步目标收益</div>
+                            <div class="panel-body">
+                                <form method="post" class="form-horizontal js-ajax-form simulate-action" action="{:url('AdminIndex/simulateDiskPost')}">
+                                    <input type="hidden" name="id" value="{$user.id}">
+                                    <input type="hidden" name="action_type" value="set_target">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">挂载机器人</label>
+                                        <div class="col-sm-6">
+                                            <select name="robot_id" class="form-control">
+                                                <foreach name="robots" item="robot">
+                                                    <option value="{$robot.id}">#{$robot.id} {$robot.platform} / {$robot.market_name}</option>
+                                                </foreach>
+                                            </select>
+                                            <if condition="empty($hasRobots)"><p class="hint-text">当前还没有机器人，请先在上方创建模拟机器人。</p></if>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">今日盈利目标</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="target_today_revenue" class="form-control" value="{$summary.today_revenue}" placeholder="例如 128.88">
+                                        </div>
+                                        <label class="col-sm-2 control-label">今日交易单数</label>
+                                        <div class="col-sm-3">
+                                            <input type="number" name="target_today_count" class="form-control" value="3" min="1" max="100">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">累计盈利目标</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="target_total_revenue" class="form-control" value="{$summary.total_revenue}" placeholder="例如 2388.66">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button type="submit" class="btn btn-primary js-ajax-submit" data-success="simulateDiskSuccess">同步收益</button>
+                                            <p class="hint-text">今日目标会拆成指定单数，所有订单收益合计严格等于目标差额；时间不会生成到当前时间之后。</p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-block">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">手动新增一条交易记录</div>
+                            <div class="panel-body">
+                                <form method="post" class="form-horizontal js-ajax-form simulate-action" action="{:url('AdminIndex/simulateDiskPost')}">
+                                    <input type="hidden" name="id" value="{$user.id}">
+                                    <input type="hidden" name="action_type" value="add_record">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">挂载机器人</label>
+                                        <div class="col-sm-4">
+                                            <select name="robot_id" class="form-control">
+                                                <foreach name="robots" item="robot">
+                                                    <option value="{$robot.id}">#{$robot.id} {$robot.platform} / {$robot.market_name}</option>
+                                                </foreach>
+                                            </select>
+                                            <if condition="empty($hasRobots)"><p class="hint-text">当前还没有机器人，请先在上方创建模拟机器人。</p></if>
+                                        </div>
+                                        <label class="col-sm-2 control-label">收益金额</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="record_revenue" class="form-control" placeholder="例如 36.58 或 -12.20">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">平台</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="record_platform" class="form-control" placeholder="留空则沿用机器人平台">
+                                        </div>
+                                        <label class="col-sm-2 control-label">市场</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="record_market" class="form-control" placeholder="留空则沿用机器人市场">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">成交时间</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="record_time" class="form-control" placeholder="例如 2026-07-12 14:25:30，留空默认当前时间">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button type="submit" class="btn btn-warning js-ajax-submit" data-success="simulateDiskSuccess">新增记录</button>
+                                            <p class="hint-text">适合你手工补“今日盈利”“某笔亏损”“某个币种盈利”等单条细节。</p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-block">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">批量生成示例数据</div>
+                            <div class="panel-body">
+                                <form method="post" class="form-horizontal js-ajax-form simulate-action" action="{:url('AdminIndex/simulateDiskPost')}">
+                                    <input type="hidden" name="id" value="{$user.id}">
+                                    <input type="hidden" name="action_type" value="generate_demo">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">挂载机器人</label>
+                                        <div class="col-sm-3">
+                                            <select name="robot_id" class="form-control">
+                                                <foreach name="robots" item="robot">
+                                                    <option value="{$robot.id}">#{$robot.id} {$robot.platform} / {$robot.market_name}</option>
+                                                </foreach>
+                                            </select>
+                                            <if condition="empty($hasRobots)"><p class="hint-text">当前还没有机器人，请先在上方创建模拟机器人。</p></if>
+                                        </div>
+                                        <label class="col-sm-2 control-label">生成天数</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" name="demo_days" class="form-control" value="7" min="1" max="30">
+                                        </div>
+                                        <label class="col-sm-2 control-label">日均条数</label>
+                                        <div class="col-sm-2">
+                                            <input type="number" name="demo_count_per_day" class="form-control" value="3" min="1" max="100">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">最小收益</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="demo_min_revenue" class="form-control" value="8">
+                                        </div>
+                                        <label class="col-sm-2 control-label">最大收益</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="demo_max_revenue" class="form-control" value="80">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button type="submit" class="btn btn-success js-ajax-submit" data-success="simulateDiskSuccess">生成示例数据</button>
+                                            <p class="hint-text">每天可生成 1-100 条正负收益记录；当天记录不会超过当前服务器时间。</p>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-block">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">最近 20 条收益记录</div>
+                            <div class="panel-body">
+                                <table class="table table-bordered table-hover table-small">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>平台</th>
+                                        <th>机器人ID</th>
+                                        <th>市场</th>
+                                        <th>收益</th>
+                                        <th>结算币</th>
+                                        <th>时间</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <foreach name="recentRecords" item="vo">
+                                        <tr>
+                                            <td>{$vo.id}</td>
+                                            <td>{$vo.platform}</td>
+                                            <td>{$vo.qrobot_id}</td>
+                                            <td>{$vo.market}</td>
+                                            <td>{$vo.revenue}</td>
+                                            <td>{$vo.money}</td>
+                                            <td>{$vo.ctime}</td>
+                                        </tr>
+                                    </foreach>
+                                    <empty name="recentRecords">
+                                        <tr>
+                                            <td colspan="7" style="text-align:center;">暂无收益记录</td>
+                                        </tr>
+                                    </empty>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function simulateDiskSuccess(data) {
+        var result = document.getElementById('simulate-result');
+        if (!result) {
+            return;
+        }
+
+        result.className = 'simulate-result success';
+        result.textContent = data.msg || '操作成功，数据已更新';
+        result.style.display = 'block';
+        window.setTimeout(function () {
+            window.location.reload();
+        }, 1400);
+    }
+
+    function simulateDiskError(message) {
+        var result = document.getElementById('simulate-result');
+        if (!result) {
+            return;
+        }
+
+        result.className = 'simulate-result error';
+        result.textContent = message || '操作失败，请检查输入并重试';
+        result.style.display = 'block';
+        window.setTimeout(function () {
+            result.style.display = 'none';
+        }, 5000);
+    }
+
+    (function () {
+        var platformSelect = document.getElementById('virtual-platform-select');
+        var marketSelect = document.getElementById('virtual-market-select');
+        if (!platformSelect || !marketSelect) {
+            return;
+        }
+
+        function syncMarketOptions() {
+            var selectedPlatform = platformSelect.value;
+            var options = marketSelect.querySelectorAll('option[data-platform]');
+            marketSelect.value = '';
+
+            for (var i = 0; i < options.length; i++) {
+                var option = options[i];
+                if (!selectedPlatform || option.getAttribute('data-platform') !== selectedPlatform) {
+                    option.style.display = 'none';
+                } else {
+                    option.style.display = '';
+                }
+            }
+        }
+
+        platformSelect.addEventListener('change', syncMarketOptions);
+    })();
+</script>
+</body>
+</html>
