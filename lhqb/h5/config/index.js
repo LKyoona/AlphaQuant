@@ -1,5 +1,11 @@
-export const WEB_URL = process.env.NUXT_PUBLIC_API_BASE || '/'
-export const IMG_BASE_URL = process.env.NUXT_PUBLIC_IMG_BASE || `${WEB_URL}upload/`
+const withTrailingSlash = value => value.endsWith('/') ? value : `${value}/`
+
+export const WEB_URL = withTrailingSlash(
+  process.env.NUXT_PUBLIC_API_BASE || 'https://apixo.lol/'
+)
+export const IMG_BASE_URL = withTrailingSlash(
+  process.env.NUXT_PUBLIC_IMG_BASE || `${WEB_URL}upload/`
+)
 
 // 部署路径
 export const DEPLOY_BASE = '/app'
