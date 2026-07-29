@@ -236,7 +236,31 @@ class PublicController extends RestBaseController
     /* 行情 */
     public function ticker()
     {
-        
+        $liveTicker = cmf_market_ticker($this->exchange_name, $this->market);
+        if ($liveTicker !== null) {
+            $last = (float) $liveTicker['last_price'];
+            $open = isset($liveTicker['open_24h']) ? (float) $liveTicker['open_24h'] : 0;
+            $data = [
+                'symbol' => $this->market,
+                'open' => $open,
+                'hign' => isset($liveTicker['high_24h']) ? (float) $liveTicker['high_24h'] : 0,
+                'low' => isset($liveTicker['low_24h']) ? (float) $liveTicker['low_24h'] : 0,
+                'last' => $last,
+                'price' => intval($last * $this->currency_rate * 100) / 100,
+                'currency_symbol' => $this->currency_char,
+                'percentage' => isset($liveTicker['change_percent_24h'])
+                    ? (float) $liveTicker['change_percent_24h']
+                    : ($open > 0 ? intval(($last - $open) * 10000 / $open) / 100 : 0),
+                'volume' => isset($liveTicker['base_volume_24h'])
+                    ? (float) $liveTicker['base_volume_24h']
+                    : 0,
+                'updated_at' => isset($liveTicker['received_at']) ? (int) $liveTicker['received_at'] : 0,
+                'stale' => false,
+            ];
+            $this->success('查询成功', $data);
+            return;
+        }
+
         $cache = $this->getRedisValue(__FUNCTION__);
         if ($cache != false) {
             $this->success('查询成功.', $cache);

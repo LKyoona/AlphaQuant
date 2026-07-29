@@ -1,5 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 
+$SkipH5 = $args -contains '-SkipH5'
 $ConfigPath = Join-Path $PSScriptRoot '..\config\production.psd1'
 $Config = Import-PowerShellDataFile (Resolve-Path $ConfigPath)
 $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\lhqb')).Path
@@ -21,45 +22,49 @@ if ($Domain -notmatch '^[A-Za-z0-9.-]+$') {
     throw "正式域名格式不正确：$Domain"
 }
 
-Write-Host '1/7 正在检查 H5 依赖...'
-$NpmCommand = Get-Command npm.cmd -ErrorAction SilentlyContinue
-if (-not $NpmCommand -and (Test-Path 'D:\nodejs\npm.cmd')) {
-    $NpmCommand = Get-Item 'D:\nodejs\npm.cmd'
-}
-if (-not $NpmCommand) {
-    throw '未找到 npm.cmd，请先安装 Node.js。'
-}
-$NpmPath = $NpmCommand.Source
-if (-not $NpmPath) {
-    $NpmPath = $NpmCommand.FullName
-}
-if (-not (Test-Path (Join-Path $H5Root 'node_modules'))) {
+if (-not $SkipH5) {
+    Write-Host '1/7 正在检查 H5 依赖...'
+    $NpmCommand = Get-Command npm.cmd -ErrorAction SilentlyContinue
+    if (-not $NpmCommand -and (Test-Path 'D:\nodejs\npm.cmd')) {
+        $NpmCommand = Get-Item 'D:\nodejs\npm.cmd'
+    }
+    if (-not $NpmCommand) {
+        throw '未找到 npm.cmd，请先安装 Node.js。'
+    }
+    $NpmPath = $NpmCommand.Source
+    if (-not $NpmPath) {
+        $NpmPath = $NpmCommand.FullName
+    }
+    if (-not (Test-Path (Join-Path $H5Root 'node_modules'))) {
+        Push-Location $H5Root
+        try {
+            & $NpmPath ci
+            if ($LASTEXITCODE -ne 0) { throw 'H5 依赖安装失败。' }
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    Write-Host '2/7 正在构建 H5 并同步到 public/app...'
     Push-Location $H5Root
     try {
-        & $NpmPath ci
-        if ($LASTEXITCODE -ne 0) { throw 'H5 依赖安装失败。' }
+        & $NpmPath run generate
+        if ($LASTEXITCODE -ne 0) { throw 'H5 构建失败。' }
     }
     finally {
         Pop-Location
     }
-}
-
-Write-Host '2/7 正在构建 H5 并同步到 public/app...'
-Push-Location $H5Root
-try {
-    & $NpmPath run generate
-    if ($LASTEXITCODE -ne 0) { throw 'H5 构建失败。' }
-}
-finally {
-    Pop-Location
-}
-if (-not (Test-Path (Join-Path $H5Output 'index.html'))) {
-    throw "H5 构建产物不完整：$H5Output"
-}
-robocopy $H5Output $PublicApp /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
-$RobocopyCode = $LASTEXITCODE
-if ($RobocopyCode -ge 8) {
-    throw "H5 同步到 public/app 失败，robocopy 退出码：$RobocopyCode"
+    if (-not (Test-Path (Join-Path $H5Output 'index.html'))) {
+        throw "H5 构建产物不完整：$H5Output"
+    }
+    robocopy $H5Output $PublicApp /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+    $RobocopyCode = $LASTEXITCODE
+    if ($RobocopyCode -ge 8) {
+        throw "H5 同步到 public/app 失败，robocopy 退出码：$RobocopyCode"
+    }
+} else {
+    Write-Host '1-2/7 已跳过 H5 构建，保留 public/app 现有产物。'
 }
 
 Write-Host '3/7 正在打包项目源码...'
@@ -69,6 +74,7 @@ tar -C $ProjectRoot `
     --exclude='./public/upload' `
     --exclude='./h5/node_modules' `
     --exclude='./h5/.output' `
+    --exclude='./python/trading' `
     --exclude='./.git' `
     -czf $Archive .
 if ($LASTEXITCODE -ne 0) { throw '项目打包失败。' }
@@ -99,6 +105,11 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '服务器正式域名配置安装失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "install -m 0644 /tmp/lhqb-php-runtime.ini /etc/php/8.1/fpm/conf.d/99-lhqb.ini && install -m 0644 /tmp/lhqb-php-runtime.ini /etc/php/8.1/cli/conf.d/99-lhqb.ini"
     if ($LASTEXITCODE -ne 0) { throw '服务器 PHP 运行配置安装失败。' }
+    $MarketService = Join-Path $PSScriptRoot '..\systemd\lhqb-market.service'
+    scp -i $SshKey -o BatchMode=yes $MarketService "${Server}:/tmp/lhqb-market.service"
+    if ($LASTEXITCODE -ne 0) { throw '行情服务配置上传失败。' }
+    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/logs/market /data/lhqb/shared/python/venvs && chown -R www-data:www-data /data/lhqb/logs/market && install -m 0644 /tmp/lhqb-market.service /etc/systemd/system/lhqb-market.service && systemctl daemon-reload && systemctl enable lhqb-market.service"
+    if ($LASTEXITCODE -ne 0) { throw '行情服务安装失败。' }
 
     Write-Host '6/7 正在执行原子发布和自动验收...'
     ssh -i $SshKey -o BatchMode=yes $Server "'/usr/local/sbin/$ProjectName-deploy' '$RemoteArchive'"

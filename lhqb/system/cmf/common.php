@@ -1381,6 +1381,35 @@ function cmf_verification_redis()
     return $redis;
 }
 
+/**
+ * 读取统一行情服务写入的最新行情。
+ *
+ * @return array|null
+ */
+function cmf_market_ticker($exchange, $market)
+{
+    $exchange = strtolower(trim((string) $exchange));
+    $symbol = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string) $market));
+    if ($exchange === '' || $symbol === '') {
+        return null;
+    }
+
+    try {
+        $raw = cmf_verification_redis()->get('lhqb:market:v1:ticker:' . $exchange . ':' . $symbol);
+    } catch (\Throwable $e) {
+        return null;
+    }
+    if ($raw === false || $raw === '') {
+        return null;
+    }
+
+    $ticker = json_decode($raw, true);
+    if (!is_array($ticker) || !isset($ticker['last_price']) || !is_numeric($ticker['last_price'])) {
+        return null;
+    }
+    return $ticker;
+}
+
 function cmf_verification_key($type, $account)
 {
     $account = cmf_normalize_verification_account($account);

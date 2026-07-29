@@ -9,6 +9,21 @@ use think\Validate;
 class TickerController extends RestBaseController
 {
 
+    // 行情服务读取的启用交易对配置
+    public function config()
+    {
+        $rows = Db::name('spot_market')
+            ->field('platform as exchange,market')
+            ->where('status', 1)
+            ->group('platform,market')
+            ->order('platform asc,market asc')
+            ->select();
+
+        $this->success('获取成功！', [
+            'list' => $rows ? $rows->toArray() : [],
+        ]);
+    }
+
     public function lists()
     {
 
@@ -49,7 +64,7 @@ class TickerController extends RestBaseController
             $userId  = $this->getUserId();           
         }
 
-        $fieldStr = 'a.id,b.exchange_name,coin,currency,volume,price,change,c.img_url';
+        $fieldStr = 'a.id,b.exchange_name,b.market,coin,currency,volume,price,change,c.img_url';
 
 
         $ticker_count = Db::name('user_ticker')
@@ -86,6 +101,23 @@ class TickerController extends RestBaseController
         $tickerData = $tickerData->toArray();
 
         foreach ($tickerData as &$ticker) {
+            $liveTicker = cmf_market_ticker($ticker['exchange_name'], $ticker['market']);
+            if ($liveTicker !== null) {
+                $ticker['price'] = (float) $liveTicker['last_price'];
+                $ticker['change'] = isset($liveTicker['change_percent_24h'])
+                    ? (float) $liveTicker['change_percent_24h']
+                    : 0;
+                $ticker['volume'] = isset($liveTicker['base_volume_24h'])
+                    ? (float) $liveTicker['base_volume_24h']
+                    : 0;
+                $ticker['updated_at'] = isset($liveTicker['received_at'])
+                    ? (int) $liveTicker['received_at']
+                    : 0;
+                $ticker['stale'] = false;
+            } else {
+                $ticker['updated_at'] = 0;
+                $ticker['stale'] = true;
+            }
             $ticker['currency_symbol'] = $currency_symbol[$data['currency']];  
             $ticker['price_usd'] = round($ticker['price'],2);  
             $ticker['price'] = floatval($rate[$data['currency']] * $ticker['price']);  

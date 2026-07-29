@@ -51,6 +51,24 @@ done < <(find "${release_dir}/api" "${release_dir}/app" "${release_dir}/public" 
 chown -R root:www-data "${release_dir}"
 find "${release_dir}" -type d -exec chmod 0755 {} +
 find "${release_dir}" -type f -exec chmod 0644 {} +
+if [ -f "${release_dir}/python/news_crawler/run.sh" ]; then
+  chmod 0755 "${release_dir}/python/news_crawler/run.sh"
+fi
+
+market_requirements="${release_dir}/python/market/requirements.txt"
+market_venv="${APP_ROOT}/shared/python/venvs/market"
+market_requirements_hash="${APP_ROOT}/shared/python/venvs/market.requirements.sha256"
+if [ -f "${market_requirements}" ]; then
+  if [ ! -x "${market_venv}/bin/python" ]; then
+    python3 -m venv "${market_venv}"
+  fi
+  current_hash="$(sha256sum "${market_requirements}" | awk '{print $1}')"
+  installed_hash="$(cat "${market_requirements_hash}" 2>/dev/null || true)"
+  if [ "${current_hash}" != "${installed_hash}" ]; then
+    "${market_venv}/bin/pip" install --disable-pip-version-check -r "${market_requirements}"
+    printf '%s\n' "${current_hash}" >"${market_requirements_hash}"
+  fi
+fi
 
 /usr/local/sbin/lhqb-backup
 
@@ -59,6 +77,7 @@ ln -sfn "${release_dir}" "${CURRENT_LINK}.next"
 mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
 
 if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
+   ! systemctl restart lhqb-market.service || \
    ! curl --silent --show-error --fail --max-time 20 \
       --resolve "${DOMAIN}:443:127.0.0.1" \
       "https://${DOMAIN}/api/home/main/init" >/dev/null; then
@@ -66,6 +85,7 @@ if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
   mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
   systemctl reload php8.1-fpm || true
   systemctl reload nginx || true
+  systemctl restart lhqb-market.service || true
   echo "Deployment failed and rolled back to ${old_release}." >&2
   exit 4
 fi

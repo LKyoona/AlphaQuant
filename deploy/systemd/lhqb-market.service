@@ -1,0 +1,25 @@
+[Unit]
+Description=LHQB unified market data service
+After=network-online.target redis-server.service nginx.service php8.1-fpm.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/data/lhqb/current/python/market
+Environment=PYTHONDONTWRITEBYTECODE=1
+EnvironmentFile=-/etc/lhqb/deploy.env
+ExecStart=/data/lhqb/shared/python/venvs/market/bin/python /data/lhqb/current/python/market/market.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/data/lhqb/logs/market/market.log
+StandardError=append:/data/lhqb/logs/market/market.log
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/data/lhqb/logs/market
+
+[Install]
+WantedBy=multi-user.target

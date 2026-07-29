@@ -23,6 +23,7 @@ mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
 ln -sfn "${current_release}" "${PREVIOUS_LINK}"
 
 if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
+   ! systemctl restart lhqb-market.service || \
    ! curl --silent --show-error --fail --max-time 20 \
       --resolve "${DOMAIN}:443:127.0.0.1" \
       "https://${DOMAIN}/api/home/main/init" >/dev/null; then
@@ -31,6 +32,7 @@ if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
   ln -sfn "${previous_release}" "${PREVIOUS_LINK}"
   systemctl reload php8.1-fpm || true
   systemctl reload nginx || true
+  systemctl restart lhqb-market.service || true
   echo 'Rollback validation failed; current release was restored.' >&2
   exit 3
 fi
