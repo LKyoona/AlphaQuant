@@ -26,9 +26,6 @@ logs/
 lhqb/data/conf/database.php
 lhqb/data/conf/email.php
 lhqb/python/db.conf
-quant_829.py
-quant_websocket.py
-redisop.py
 .env
 .env.*
 !.env.example

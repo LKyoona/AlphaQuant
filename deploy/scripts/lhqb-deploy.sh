@@ -70,6 +70,21 @@ if [ -f "${market_requirements}" ]; then
   fi
 fi
 
+trading_requirements="${release_dir}/python/trading/requirements.txt"
+trading_venv="${APP_ROOT}/shared/python/venvs/trading"
+trading_requirements_hash="${APP_ROOT}/shared/python/venvs/trading.requirements.sha256"
+if [ -f "${trading_requirements}" ]; then
+  if [ ! -x "${trading_venv}/bin/python" ]; then
+    python3 -m venv "${trading_venv}"
+  fi
+  current_hash="$(sha256sum "${trading_requirements}" | awk '{print $1}')"
+  installed_hash="$(cat "${trading_requirements_hash}" 2>/dev/null || true)"
+  if [ "${current_hash}" != "${installed_hash}" ]; then
+    "${trading_venv}/bin/pip" install --disable-pip-version-check -r "${trading_requirements}"
+    printf '%s\n' "${current_hash}" >"${trading_requirements_hash}"
+  fi
+fi
+
 /usr/local/sbin/lhqb-backup
 
 ln -sfn "${old_release}" "${PREVIOUS_LINK}"

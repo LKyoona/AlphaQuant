@@ -10,7 +10,7 @@ Group=www-data
 WorkingDirectory=/data/lhqb/current/python/market
 Environment=PYTHONDONTWRITEBYTECODE=1
 EnvironmentFile=-/etc/lhqb/deploy.env
-ExecStart=/data/lhqb/shared/python/venvs/market/bin/python /data/lhqb/current/python/market/market.py
+ExecStart=/data/lhqb/shared/python/venvs/market/bin/python /data/lhqb/current/python/market/market_service.py
 Restart=always
 RestartSec=5
 StandardOutput=append:/data/lhqb/logs/market/market.log

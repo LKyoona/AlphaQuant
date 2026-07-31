@@ -74,7 +74,6 @@ tar -C $ProjectRoot `
     --exclude='./public/upload' `
     --exclude='./h5/node_modules' `
     --exclude='./h5/.output' `
-    --exclude='./python/trading' `
     --exclude='./.git' `
     -czf $Archive .
 if ($LASTEXITCODE -ne 0) { throw '项目打包失败。' }
