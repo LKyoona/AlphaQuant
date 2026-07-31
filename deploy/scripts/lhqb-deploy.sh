@@ -70,21 +70,6 @@ if [ -f "${market_requirements}" ]; then
   fi
 fi
 
-trading_requirements="${release_dir}/python/trading/requirements.txt"
-trading_venv="${APP_ROOT}/shared/python/venvs/trading"
-trading_requirements_hash="${APP_ROOT}/shared/python/venvs/trading.requirements.sha256"
-if [ -f "${trading_requirements}" ]; then
-  if [ ! -x "${trading_venv}/bin/python" ]; then
-    python3 -m venv "${trading_venv}"
-  fi
-  current_hash="$(sha256sum "${trading_requirements}" | awk '{print $1}')"
-  installed_hash="$(cat "${trading_requirements_hash}" 2>/dev/null || true)"
-  if [ "${current_hash}" != "${installed_hash}" ]; then
-    "${trading_venv}/bin/pip" install --disable-pip-version-check -r "${trading_requirements}"
-    printf '%s\n' "${current_hash}" >"${trading_requirements_hash}"
-  fi
-fi
-
 /usr/local/sbin/lhqb-backup
 
 ln -sfn "${old_release}" "${PREVIOUS_LINK}"
@@ -93,6 +78,7 @@ mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
 
 if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
    ! systemctl restart lhqb-market.service || \
+   ! systemctl restart lhqb-trading.service || \
    ! curl --silent --show-error --fail --max-time 20 \
       --resolve "${DOMAIN}:443:127.0.0.1" \
       "https://${DOMAIN}/api/home/main/init" >/dev/null; then
@@ -101,6 +87,7 @@ if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
   systemctl reload php8.1-fpm || true
   systemctl reload nginx || true
   systemctl restart lhqb-market.service || true
+  systemctl restart lhqb-trading.service || true
   echo "Deployment failed and rolled back to ${old_release}." >&2
   exit 4
 fi

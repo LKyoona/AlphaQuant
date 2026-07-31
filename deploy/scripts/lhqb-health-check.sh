@@ -31,6 +31,7 @@ check_service php8.1-fpm
 check_service mysql
 check_service redis-server
 check_service lhqb-market.service
+check_service lhqb-trading.service
 check_service lhqb-news-crawler.timer
 check_service lhqb-backup.timer
 check_service lhqb-smtp-mss.service

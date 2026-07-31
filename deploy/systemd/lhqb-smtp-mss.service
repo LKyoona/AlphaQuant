@@ -1,5 +1,5 @@
 [Unit]
-Description=Neuranet SMTP TCP MSS workaround
+Description=LHQB SMTP TCP MSS workaround
 After=network-online.target ufw.service
 Wants=network-online.target
 

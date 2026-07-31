@@ -1,5 +1,5 @@
 [Unit]
-Description=Neuranet production health check
+Description=LHQB production health check
 After=network-online.target nginx.service php8.1-fpm.service mysql.service redis-server.service
 
 [Service]

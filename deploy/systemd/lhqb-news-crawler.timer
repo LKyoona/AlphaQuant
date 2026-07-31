@@ -1,5 +1,5 @@
 [Unit]
-Description=Run NeuraNet news crawler every 30 minutes
+Description=Run LHQB news crawler every 30 minutes
 
 [Timer]
 OnCalendar=*:0/30

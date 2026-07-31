@@ -1,5 +1,5 @@
 [Unit]
-Description=Check Neuranet production health every five minutes
+Description=Check LHQB production health every five minutes
 
 [Timer]
 OnBootSec=2min

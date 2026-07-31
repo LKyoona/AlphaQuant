@@ -1,5 +1,5 @@
 [Unit]
-Description=NeuraNet CoinDesk news crawler
+Description=LHQB CoinDesk news crawler
 After=network-online.target mysql.service
 Wants=network-online.target
 

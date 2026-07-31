@@ -1,5 +1,5 @@
 [Unit]
-Description=Neuranet production backup
+Description=LHQB production backup
 After=mysql.service
 Requires=mysql.service
 

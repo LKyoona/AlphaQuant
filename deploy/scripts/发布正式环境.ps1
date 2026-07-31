@@ -84,7 +84,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '发布包上传失败。' }
 
     Write-Host '5/7 正在同步 lhqb 服务器部署命令...'
-    $ServerScripts = @('lhqb-deploy.sh', 'lhqb-rollback.sh', 'lhqb-backup.sh', 'lhqb-health-check.sh')
+    $ServerScripts = @('lhqb-deploy.sh', 'lhqb-rollback.sh', 'lhqb-backup.sh', 'lhqb-health-check.sh', 'lhqb-trading-run.sh', 'lhqb-smtp-mss.sh')
     foreach ($ScriptName in $ServerScripts) {
         $LocalScript = Join-Path $PSScriptRoot $ScriptName
         scp -i $SshKey -o BatchMode=yes $LocalScript "${Server}:/tmp/$ScriptName"
@@ -98,7 +98,7 @@ try {
     $PhpRuntimeConfig = Join-Path $PSScriptRoot '..\config\php-runtime.ini'
     scp -i $SshKey -o BatchMode=yes $PhpRuntimeConfig "${Server}:/tmp/lhqb-php-runtime.ini"
     if ($LASTEXITCODE -ne 0) { throw 'PHP 运行配置上传失败。' }
-    ssh -i $SshKey -o BatchMode=yes $Server "install -m 0755 /tmp/lhqb-deploy.sh /usr/local/sbin/lhqb-deploy && install -m 0755 /tmp/lhqb-rollback.sh /usr/local/sbin/lhqb-rollback && install -m 0755 /tmp/lhqb-backup.sh /usr/local/sbin/lhqb-backup && install -m 0755 /tmp/lhqb-health-check.sh /usr/local/sbin/lhqb-health-check"
+    ssh -i $SshKey -o BatchMode=yes $Server "install -m 0755 /tmp/lhqb-deploy.sh /usr/local/sbin/lhqb-deploy && install -m 0755 /tmp/lhqb-rollback.sh /usr/local/sbin/lhqb-rollback && install -m 0755 /tmp/lhqb-backup.sh /usr/local/sbin/lhqb-backup && install -m 0755 /tmp/lhqb-health-check.sh /usr/local/sbin/lhqb-health-check && install -m 0755 /tmp/lhqb-trading-run.sh /usr/local/sbin/lhqb-trading-run && install -m 0755 /tmp/lhqb-smtp-mss.sh /usr/local/sbin/lhqb-smtp-mss"
     if ($LASTEXITCODE -ne 0) { throw '服务器部署命令安装失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /etc/lhqb && install -m 0644 /tmp/lhqb-deploy.env /etc/lhqb/deploy.env"
     if ($LASTEXITCODE -ne 0) { throw '服务器正式域名配置安装失败。' }
@@ -112,11 +112,33 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '邮件配置上传失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "install -o root -g www-data -m 0640 /tmp/lhqb-email.php /data/lhqb/shared/data/conf/email.php && rm -f /tmp/lhqb-email.php"
     if ($LASTEXITCODE -ne 0) { throw '邮件配置安装失败。' }
-    $MarketService = Join-Path $PSScriptRoot '..\systemd\lhqb-market.service'
-    scp -i $SshKey -o BatchMode=yes $MarketService "${Server}:/tmp/lhqb-market.service"
-    if ($LASTEXITCODE -ne 0) { throw '行情服务配置上传失败。' }
-    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/logs/market /data/lhqb/shared/python/venvs && chown -R www-data:www-data /data/lhqb/logs/market && install -m 0644 /tmp/lhqb-market.service /etc/systemd/system/lhqb-market.service && systemctl daemon-reload && systemctl enable lhqb-market.service"
-    if ($LASTEXITCODE -ne 0) { throw '行情服务安装失败。' }
+    $SystemdUnits = @(
+        'lhqb-backup.service',
+        'lhqb-backup.timer',
+        'lhqb-health-check.service',
+        'lhqb-health-check.timer',
+        'lhqb-market.service',
+        'lhqb-news-crawler.service',
+        'lhqb-news-crawler.timer',
+        'lhqb-smtp-mss.service',
+        'lhqb-trading.service'
+    )
+    foreach ($UnitName in $SystemdUnits) {
+        $LocalUnit = Join-Path $PSScriptRoot "..\systemd\$UnitName"
+        scp -i $SshKey -o BatchMode=yes $LocalUnit "${Server}:/tmp/$UnitName"
+        if ($LASTEXITCODE -ne 0) { throw "systemd 配置上传失败：$UnitName" }
+    }
+    $InstallUnits = ($SystemdUnits | ForEach-Object {
+        "install -m 0644 /tmp/$_ /etc/systemd/system/$_"
+    }) -join ' && '
+    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/logs/application /data/lhqb/logs/crawler /data/lhqb/logs/market /data/lhqb/logs/trading /data/lhqb/shared/python/venvs && chown -R www-data:www-data /data/lhqb/logs/crawler /data/lhqb/logs/market && $InstallUnits && systemctl daemon-reload"
+    if ($LASTEXITCODE -ne 0) { throw 'LHQB systemd 服务安装失败。' }
+    ssh -i $SshKey -o BatchMode=yes $Server "systemctl disable --now neuranet-news-crawler.timer neuranet-backup.timer neuranet-health-check.timer neuranet-smtp-mss.service >/dev/null 2>&1 || true; systemctl enable --now lhqb-news-crawler.timer lhqb-backup.timer lhqb-health-check.timer lhqb-smtp-mss.service; systemctl enable lhqb-market.service lhqb-trading.service"
+    if ($LASTEXITCODE -ne 0) { throw 'LHQB systemd 服务启用失败。' }
+    ssh -i $SshKey -o BatchMode=yes $Server "(crontab -l 2>/dev/null || true) | grep -v '/usr/local/sbin/lhqb-trading-run' | crontab - && rm -f /etc/cron.d/lhqb-trading /etc/cron.d/lhqb-trading.disabled"
+    if ($LASTEXITCODE -ne 0) { throw '旧交易 Cron 清理失败。' }
+    ssh -i $SshKey -o BatchMode=yes $Server "dpkg -s python3-pymysql >/dev/null 2>&1 || (apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pymysql)"
+    if ($LASTEXITCODE -ne 0) { throw '交易数据库驱动安装失败。' }
 
     Write-Host '6/7 正在执行原子发布和自动验收...'
     ssh -i $SshKey -o BatchMode=yes $Server "'/usr/local/sbin/$ProjectName-deploy' '$RemoteArchive'"

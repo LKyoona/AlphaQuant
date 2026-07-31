@@ -15,6 +15,8 @@ for service in nginx php8.1-fpm mysql redis-server; do
 done
 systemctl is-enabled --quiet lhqb-market.service
 systemctl is-active --quiet lhqb-market.service
+systemctl is-enabled --quiet lhqb-trading.service
+systemctl is-active --quiet lhqb-trading.service
 systemctl is-enabled --quiet lhqb-smtp-mss.service
 systemctl is-active --quiet lhqb-smtp-mss.service
 for timer in lhqb-news-crawler.timer lhqb-backup.timer lhqb-health-check.timer; do

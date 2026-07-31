@@ -1,0 +1,23 @@
+[Unit]
+Description=LHQB 正式交易引擎
+After=network-online.target mysql.service redis-server.service lhqb-market.service
+Wants=network-online.target
+Requires=mysql.service redis-server.service lhqb-market.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/sbin/lhqb-trading-run
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+StandardOutput=append:/data/lhqb/logs/trading/trading.log
+StandardError=append:/data/lhqb/logs/trading/trading.log
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

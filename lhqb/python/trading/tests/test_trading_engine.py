@@ -1,11 +1,15 @@
 import unittest
+import threading
 from dataclasses import replace
 from decimal import Decimal
+from types import SimpleNamespace
 
 import ccxt
 
 from trading.trading_engine import (
     Decision,
+    ExchangeGateway,
+    InsufficientBalanceError,
     OrderResult,
     RobotConfig,
     RuntimeState,
@@ -13,6 +17,7 @@ from trading.trading_engine import (
     TradingEngine,
     UncertainOrderError,
     ZERO,
+    user_text,
 )
 
 
@@ -63,6 +68,7 @@ class StrategyPlannerTests(unittest.TestCase):
         decision = StrategyPlanner.evaluate(robot(), None, Decimal("100"))
         self.assertEqual(StrategyPlanner.OPEN, decision.action)
         self.assertEqual(Decimal("100"), decision.quote_amount)
+        self.assertEqual("首次建仓", decision.reason)
 
     def test_empty_robot_acknowledges_manual_clean(self):
         decision = StrategyPlanner.evaluate(robot(is_clean=True), None, Decimal("100"))
@@ -110,6 +116,30 @@ class StrategyPlannerTests(unittest.TestCase):
         original = state(deal_amount=Decimal("0.123456789"), deal_money=Decimal("123.456789"))
         restored = RuntimeState.from_json(original.to_json())
         self.assertEqual(original, restored)
+
+    def test_user_visible_strategy_text_is_english(self):
+        self.assertEqual("Open initial position", user_text("首次建仓"))
+        self.assertEqual(
+            "USDT available balance is insufficient: required 6.0, available 0.0",
+            user_text("USDT 可用余额不足：需要 6.0，可用 0.0"),
+        )
+        self.assertEqual(
+            "Open initial position failed: Exchange API permission denied; enable spot read and trading permissions",
+            user_text("首次建仓 执行失败：交易所 API 权限不足，请开启现货读取和现货交易权限"),
+        )
+        self.assertEqual(
+            "Open initial position was rejected by the exchange: "
+            "USDT available balance is insufficient: required 6.0, available 0.0",
+            user_text("首次建仓 被交易所拒绝：USDT 可用余额不足：需要 6.0，可用 0.0"),
+        )
+        self.assertEqual(
+            "Strategy status: action=Wait; reason=No trading action required",
+            user_text("策略状态：动作=等待；原因=暂时没有交易动作"),
+        )
+        self.assertEqual(
+            "Open initial position; average=1862.97 amount=0.0031968 cost=5.961504",
+            user_text("首次建仓; average=1862.97 amount=0.0031968 cost=5.961504"),
+        )
 
     def test_invalid_runtime_state_is_not_treated_as_a_position(self):
         self.assertIsNone(RuntimeState.from_json('{"base_price":0}'))
@@ -163,6 +193,103 @@ class OrderIntentTests(unittest.TestCase):
         with self.assertRaises(UncertainOrderError):
             engine._execute_buy(robot(), None, decision, Decimal("100"))
         self.assertFalse(repository.released)
+
+    def test_binance_2015_rejection_releases_intent(self):
+        repository = self.FakeRepository()
+        error = ccxt.DDoSProtection(
+            'binance {"code":-2015,"msg":"Invalid API-key, IP, or permissions for action."}'
+        )
+        engine = self.engine(repository, self.FakeGateway(error))
+        decision = Decision(StrategyPlanner.OPEN, None, ZERO, "首次建仓", Decimal("100"))
+        with self.assertRaises(ccxt.DDoSProtection):
+            engine._execute_buy(robot(), None, decision, Decimal("100"))
+        self.assertTrue(repository.released)
+
+
+class BalanceCheckTests(unittest.TestCase):
+    class FakeExchange:
+        has = {"createMarketBuyOrderWithCost": True}
+        id = "binance"
+
+        def __init__(self):
+            self.order_called = False
+
+        def load_markets(self):
+            return None
+
+        def fetch_balance(self):
+            return {"free": {"USDT": 25}}
+
+        def create_market_buy_order_with_cost(self, *_args, **_kwargs):
+            self.order_called = True
+            raise AssertionError("余额不足时不应该调用下单接口")
+
+        def close(self):
+            return None
+
+    def test_insufficient_balance_skips_exchange_order(self):
+        exchange = self.FakeExchange()
+        gateway = ExchangeGateway()
+        gateway.create_exchange = lambda _robot: exchange
+
+        with self.assertRaises(InsufficientBalanceError) as raised:
+            gateway.market_buy(robot(), Decimal("100"), Decimal("10"), "client-1")
+
+        self.assertEqual(Decimal("100"), raised.exception.required)
+        self.assertEqual(Decimal("25"), raised.exception.available)
+        self.assertFalse(exchange.order_called)
+
+
+class UserIsolationTests(unittest.TestCase):
+    class FakeRepository:
+        @staticmethod
+        def cleanup_error_logs():
+            return 0
+
+        @staticmethod
+        def load_active_robots(_shard_index, _shard_count):
+            return [{"id": 1}, {"id": 2}]
+
+    def test_one_robot_failure_does_not_stop_other_robots(self):
+        engine = object.__new__(TradingEngine)
+        engine.config = SimpleNamespace(workers=2, poll_seconds=1)
+        engine.repository = self.FakeRepository()
+        engine.running = True
+        engine.live = False
+        processed = []
+
+        def process(row):
+            processed.append(row["id"])
+            if row["id"] == 1:
+                raise RuntimeError("模拟单用户异常")
+
+        engine.process_robot = process
+        engine.run(0, 1, once=True)
+        self.assertCountEqual([1, 2], processed)
+
+    def test_binance_permission_error_is_translated(self):
+        error = ccxt.DDoSProtection(
+            'binance {"code":-2015,"msg":"Invalid API-key, IP, or permissions for action."}'
+        )
+        message = TradingEngine._exchange_error_message(error)
+        self.assertIn("服务器 IP 不在白名单", message)
+        self.assertIn("错误码 -2015", message)
+
+    def test_repeated_robot_status_is_logged_only_once(self):
+        engine = object.__new__(TradingEngine)
+        engine._status_lock = threading.Lock()
+        engine._robot_status = {}
+        configured = robot()
+
+        with self.assertLogs("lhqb.trading", level="WARNING") as captured:
+            first = engine._log_robot_status(configured, "balance:0", 30, "余额不足")
+            repeated = engine._log_robot_status(configured, "balance:0", 30, "余额不足")
+            changed = engine._log_robot_status(configured, "balance:10", 30, "余额发生变化")
+
+        self.assertTrue(first)
+        self.assertFalse(repeated)
+        self.assertTrue(changed)
+        self.assertEqual(2, len(captured.output))
 
 
 if __name__ == "__main__":
