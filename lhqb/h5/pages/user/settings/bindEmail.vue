@@ -16,7 +16,17 @@
         :rules="[{ required: true, message: $t('settingsPage.code_please') }]"
       >
         <template #button>
-          <van-button size="small" type="primary" block @click.prevent="handleGetCode">{{ $t('settingsPage.send') }}</van-button>
+          <van-button
+            size="small"
+            type="primary"
+            block
+            :loading="sendingCode"
+            :disabled="times !== 60 || sendingCode"
+            @click.prevent="handleGetCode"
+          >
+            <template v-if="times === 60">{{ $t('settingsPage.send') }}</template>
+            <template v-else>{{ times }}s</template>
+          </van-button>
         </template>
       </van-field>
       <MailDeliveryNotice v-if="mailNoticeVisible" />
@@ -38,8 +48,12 @@ export default {
       username: '',
       verification_code: '',
       times: 60,
+      sendingCode: false,
       mailNoticeVisible: false
     }
+  },
+  beforeUnmount () {
+    clearInterval(this.timer)
   },
   methods: {
     ...mapActions({
@@ -48,7 +62,10 @@ export default {
       getCode: 'user/getCode'
     }),
     handleGetCode () {
+      if (this.sendingCode || this.times !== 60) return
+      this.username = this.username.trim().toLowerCase()
       if (isEmail(this.username)) {
+        this.sendingCode = true
         this.getCode(this.username)
           .then(() => {
             this.mailNoticeVisible = true
@@ -58,11 +75,15 @@ export default {
           .catch(({ msg }) => {
             this.$toast(msg)
           })
+          .finally(() => {
+            this.sendingCode = false
+          })
       } else {
         this.$toast('邮箱号格式不正确')
       }
     },
     getTime () {
+      clearInterval(this.timer)
       this.timer = setInterval(() => {
         this.times--
         if (this.times === 0) {

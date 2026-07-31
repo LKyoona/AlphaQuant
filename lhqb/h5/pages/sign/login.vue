@@ -58,7 +58,8 @@
               <van-button
                 size="small"
                 class="mini-btn gold-btn h-8 px-3 text-xs"
-                :disabled="times !== 60"
+                :loading="sendingCode"
+                :disabled="times !== 60 || sendingCode"
                 @click.prevent="handleGetCode"
               >
                 <template v-if="times === 60">{{ $t('pageSign.send_code') }}</template>
@@ -106,9 +107,13 @@ export default {
       password: '',
       verification_code: '',
       times: 60,
+      sendingCode: false,
       mailNoticeVisible: false,
       submitting: false,
     }
+  },
+  beforeUnmount () {
+    clearInterval(this.timer)
   },
   methods: {
     ...mapActions({
@@ -117,6 +122,13 @@ export default {
     }),
     isEmail,
     handleGetCode () {
+      if (this.sendingCode || this.times !== 60) return
+      this.username = this.username.trim().toLowerCase()
+      if (!this.isEmail(this.username)) {
+        this.$toast(this.$t('pageSign.account_err'))
+        return
+      }
+      this.sendingCode = true
       this.$toast.loading()
       this.getCode(this.username)
         .then(({ msg }) => {
@@ -128,6 +140,9 @@ export default {
         .catch(({ msg }) => {
           this.$toast.clear()
           this.$toast(msg)
+        })
+        .finally(() => {
+          this.sendingCode = false
         })
     },
     onSubmit () {
@@ -157,6 +172,7 @@ export default {
         })
     },
     getTime () {
+      clearInterval(this.timer)
       this.timer = setInterval(() => {
         this.times--
         if (this.times === 0) {
