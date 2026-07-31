@@ -139,6 +139,8 @@ export default {
 		valid_code: '验证码',
 		send_code: '发送验证码',
 		code_latest_notice: '验证码已发送，请只使用最新一封邮件中的验证码',
+		code_sent_title: '验证码邮件已发送',
+		code_sent_notice: '若收件箱没有显示，请立即检查垃圾邮件或促销邮件，并只使用最新一封邮件中的验证码。',
 		pwd: '密码',
 		confirm_pwd: '确认密码',
 		account_err: '账号格式不正确',

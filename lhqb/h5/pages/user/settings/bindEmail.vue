@@ -19,6 +19,7 @@
           <van-button size="small" type="primary" block @click.prevent="handleGetCode">{{ $t('settingsPage.send') }}</van-button>
         </template>
       </van-field>
+      <MailDeliveryNotice v-if="mailNoticeVisible" />
       <div style="margin: 15px">
         <van-button block type="info" native-type="submit" class="submit">
           {{ $t('actions.submit') }}
@@ -36,7 +37,8 @@ export default {
     return {
       username: '',
       verification_code: '',
-      times: 60
+      times: 60,
+      mailNoticeVisible: false
     }
   },
   methods: {
@@ -49,6 +51,8 @@ export default {
       if (isEmail(this.username)) {
         this.getCode(this.username)
           .then(() => {
+            this.mailNoticeVisible = true
+            this.$toast(this.$t('pageSign.code_sent_notice'))
             this.getTime()
           })
           .catch(({ msg }) => {

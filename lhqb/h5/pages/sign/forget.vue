@@ -31,6 +31,7 @@
               </van-button>
             </template>
           </van-field>
+          <MailDeliveryNotice v-if="mailNoticeVisible" />
           <van-field
             v-model="password"
             type="password"
@@ -68,7 +69,8 @@ export default {
       password: '',
       confirm_password: '',
       verification_code: '',
-      times: 60
+      times: 60,
+      mailNoticeVisible: false
     }
   },
   methods: {
@@ -87,6 +89,8 @@ export default {
       this.getCode(this.username)
         .then(() => {
           this.$toast.clear()
+          this.mailNoticeVisible = true
+          this.$toast(this.$t('pageSign.code_sent_notice'))
           this.getTime()
         })
         .catch(({ msg }) => {

@@ -105,6 +105,14 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '服务器正式域名配置安装失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "install -m 0644 /tmp/lhqb-php-runtime.ini /etc/php/8.1/fpm/conf.d/99-lhqb.ini && install -m 0644 /tmp/lhqb-php-runtime.ini /etc/php/8.1/cli/conf.d/99-lhqb.ini"
     if ($LASTEXITCODE -ne 0) { throw '服务器 PHP 运行配置安装失败。' }
+    $EmailConfig = Join-Path $ProjectRoot 'data\conf\email.php'
+    if (-not (Test-Path $EmailConfig)) {
+        throw "邮件配置不存在：$EmailConfig"
+    }
+    scp -i $SshKey -o BatchMode=yes $EmailConfig "${Server}:/tmp/lhqb-email.php"
+    if ($LASTEXITCODE -ne 0) { throw '邮件配置上传失败。' }
+    ssh -i $SshKey -o BatchMode=yes $Server "install -o root -g www-data -m 0640 /tmp/lhqb-email.php /data/lhqb/shared/data/conf/email.php && rm -f /tmp/lhqb-email.php"
+    if ($LASTEXITCODE -ne 0) { throw '邮件配置安装失败。' }
     $MarketService = Join-Path $PSScriptRoot '..\systemd\lhqb-market.service'
     scp -i $SshKey -o BatchMode=yes $MarketService "${Server}:/tmp/lhqb-market.service"
     if ($LASTEXITCODE -ne 0) { throw '行情服务配置上传失败。' }

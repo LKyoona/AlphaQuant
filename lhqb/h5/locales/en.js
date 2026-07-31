@@ -123,6 +123,8 @@ export default {
     valid_code: 'Code',
     send_code: 'Send code',
     code_latest_notice: 'Code sent. Please use the code from the latest email.',
+    code_sent_title: 'Verification email sent',
+    code_sent_notice: 'If it is not in your inbox, check Spam or Promotions now. Only use the code from the latest email.',
     pwd: 'Password',
     confirm_pwd: 'Confirm',
     account_err: 'Incorrect account format',

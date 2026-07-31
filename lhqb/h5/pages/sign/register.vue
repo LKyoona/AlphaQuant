@@ -39,6 +39,7 @@
               </van-button>
             </template>
           </van-field>
+          <MailDeliveryNotice v-if="mailNoticeVisible" />
           <van-field
             v-model="password"
             type="password"
@@ -103,6 +104,7 @@ export default {
       checked: false,
       times: 60,
       sendingCode: false,
+      mailNoticeVisible: false,
       submitting: false
     }
   },
@@ -188,7 +190,8 @@ export default {
         this.$toast.clear()
         // A newly issued code invalidates every previous email code.
         this.verification_code = ''
-        this.$toast(this.$t('pageSign.code_latest_notice'))
+        this.mailNoticeVisible = true
+        this.$toast(this.$t('pageSign.code_sent_notice'))
         this.startCodeCooldown(Date.now() + 60000)
       }).catch((res) => {
         this.$toast.clear()

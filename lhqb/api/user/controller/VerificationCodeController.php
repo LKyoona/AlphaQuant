@@ -12,7 +12,6 @@ namespace api\user\controller;
 
 use cmf\controller\RestBaseController;
 use think\Validate;
-use think\View;
 
 class VerificationCodeController extends RestBaseController
 {
@@ -195,6 +194,30 @@ class VerificationCodeController extends RestBaseController
         return '=?UTF-8?B?' . base64_encode($value) . '?=';
     }
 
+    private function htmlToPlainText($html)
+    {
+        $text = preg_replace('/<(?:br\s*\/?>|\/p>|\/div>|\/h[1-6]>)/i', "\n", (string) $html);
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES, 'UTF-8');
+        $text = preg_replace("/[ \t]+/", ' ', $text);
+        $text = preg_replace("/\n{3,}/", "\n\n", $text);
+        return trim($text);
+    }
+
+    private function buildVerificationEmail($code)
+    {
+        $safeCode = htmlspecialchars((string) $code, ENT_QUOTES, 'UTF-8');
+        return '<!doctype html><html><body style="margin:0;padding:0;background:#0b0d12;color:#f8efd9;">'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0d12;padding:32px 12px;">'
+            . '<tr><td align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#15110c;border:1px solid #6b5025;border-radius:18px;overflow:hidden;">'
+            . '<tr><td style="padding:30px 34px 14px;font-family:Arial,sans-serif;color:#d7aa54;font-size:12px;letter-spacing:3px;text-transform:uppercase;">AI Crypto Star</td></tr>'
+            . '<tr><td style="padding:0 34px;font-family:Arial,sans-serif;color:#fff7e6;font-size:26px;font-weight:700;">Verify your email</td></tr>'
+            . '<tr><td style="padding:12px 34px 0;font-family:Arial,sans-serif;color:#c9bfae;font-size:15px;line-height:1.7;">Use the security code below to continue. Only the newest code is valid.</td></tr>'
+            . '<tr><td style="padding:24px 34px;"><div style="padding:19px 16px;background:#0b0d12;border:1px solid #a97b30;border-radius:12px;text-align:center;font-family:Arial,sans-serif;color:#ffd77a;font-size:34px;font-weight:800;letter-spacing:9px;">' . $safeCode . '</div></td></tr>'
+            . '<tr><td style="padding:0 34px 30px;font-family:Arial,sans-serif;color:#9f9688;font-size:13px;line-height:1.7;">This code expires in 30 minutes. If you did not request it, you can safely ignore this email.</td></tr>'
+            . '<tr><td style="padding:18px 34px;background:#100d09;border-top:1px solid #332718;font-family:Arial,sans-serif;color:#766d61;font-size:12px;">Automated security message. Please do not reply.</td></tr>'
+            . '</table></td></tr></table></body></html>';
+    }
+
     private function sendSmtpMail($smtpSetting, $address, $subject, $message)
     {
         $host = $smtpSetting['host'];
@@ -216,7 +239,9 @@ class VerificationCodeController extends RestBaseController
                 throw new \RuntimeException('SMTP greeting failed: ' . $response);
             }
 
-            $serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost';
+            $serverName = !empty($smtpSetting['helo_domain'])
+                ? $smtpSetting['helo_domain']
+                : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
             $this->smtpCommand($socket, 'EHLO ' . $serverName, ['250']);
 
             if ($secure === 'tls') {
@@ -235,16 +260,34 @@ class VerificationCodeController extends RestBaseController
             $this->smtpCommand($socket, 'DATA', ['354']);
 
             $fromName = empty($smtpSetting['from_name']) ? 'AI Crypto Star' : $smtpSetting['from_name'];
+            $messageIdDomain = empty($smtpSetting['message_id_domain'])
+                ? substr(strrchr($smtpSetting['from'], '@'), 1)
+                : $smtpSetting['message_id_domain'];
+            if (!preg_match('/^[A-Za-z0-9.-]+$/', (string) $messageIdDomain)) {
+                $messageIdDomain = 'localhost';
+            }
+            $boundary = '=_lhqb_' . bin2hex(random_bytes(12));
+            $plainMessage = $this->htmlToPlainText($message);
             $headers = [
                 'Date: ' . date('r'),
+                'Message-ID: <' . bin2hex(random_bytes(16)) . '.' . time() . '@' . $messageIdDomain . '>',
                 'From: ' . $this->encodeMailHeader($fromName) . ' <' . $smtpSetting['from'] . '>',
                 'To: <' . $address . '>',
                 'Subject: ' . $this->encodeMailHeader($subject),
+                'Auto-Submitted: auto-generated',
+                'X-Auto-Response-Suppress: All',
                 'MIME-Version: 1.0',
-                'Content-Type: text/html; charset=UTF-8',
-                'Content-Transfer-Encoding: base64',
+                'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
             ];
-            $body = chunk_split(base64_encode($message));
+            $body = '--' . $boundary . "\r\n"
+                . "Content-Type: text/plain; charset=UTF-8\r\n"
+                . "Content-Transfer-Encoding: base64\r\n\r\n"
+                . chunk_split(base64_encode($plainMessage)) . "\r\n"
+                . '--' . $boundary . "\r\n"
+                . "Content-Type: text/html; charset=UTF-8\r\n"
+                . "Content-Transfer-Encoding: base64\r\n\r\n"
+                . chunk_split(base64_encode($message)) . "\r\n"
+                . '--' . $boundary . "--\r\n";
             fwrite($socket, implode("\r\n", $headers) . "\r\n\r\n" . $body . "\r\n.\r\n");
             $response = $this->readSmtpResponse($socket);
             if (substr($response, 0, 3) !== '250') {
@@ -304,24 +347,14 @@ class VerificationCodeController extends RestBaseController
         if ($accountType == 'email') {
             try {
 
-                $emailTemplate = cmf_get_option('email_template_verification_code');
-
-                $user     = cmf_get_current_user();
-                $username = empty($user['user_nickname']) ? (empty($user['user_login']) ? 'there' : $user['user_login']) : $user['user_nickname'];
-
-                if (empty($emailTemplate['template'])) {
-                    $emailTemplate['template'] = '<div style="font-family:Arial,sans-serif;line-height:1.7;color:#111827;"><h2>AI Crypto Star Verification Code</h2><p>Hello {$username},</p><p>Your verification code is:</p><p style="font-size:28px;font-weight:bold;letter-spacing:4px;color:#b8860b;">{$code}</p><p>This code is valid for a short time. If you did not request it, please ignore this email.</p></div>';
-                }
-
-                $message = htmlspecialchars_decode($emailTemplate['template']);
-                $view    = new View();
-                $message = $view->display($message, ['code' => $code, 'username' => $username]);
-                $subject = empty($emailTemplate['subject']) ? 'AI Crypto Star verification code' : $emailTemplate['subject'];
+                // Verification mail uses one maintained template instead of the legacy DB HTML.
+                $message = $this->buildVerificationEmail($code);
+                $subject = 'Your AI Crypto Star verification code';
                 $result  = $this->sendVerificationEmail($data['username'], $subject, $message);
 
                 if (empty($result['error'])) {
                     cmf_verification_code_log($data['username'], $code);
-                    $this->success("验证码已经发送成功!");
+                    $this->success('验证码已发送。若收件箱未显示，请检查垃圾邮件或促销邮件；仅使用最新一封邮件中的验证码。');
                 } else {
                     cmf_release_verification_cooldown($data['username']);
                     $this->error('验证码邮件暂时发送失败，请稍后重试');
