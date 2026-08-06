@@ -257,7 +257,8 @@ export default {
       account: {},
       accountLoading: false,
       robotLoading: true,
-      last: ''
+      last: '',
+      refreshTimer: null
     }
   },
   computed: {
@@ -274,9 +275,9 @@ export default {
     } catch (e) {
       this.market_id = this.$route.query.market_id || ''
     }
-    const robotRequest = this.robotFind(this.market_id)
-      ? Promise.resolve()
-      : this.robotList()
+    // Always request a fresh row: the trading service may update the position
+    // while this robot still exists in the Vuex navigation cache.
+    const robotRequest = this.robotList()
     robotRequest.then(() => {
       this.robot = this.robotFind(this.market_id) || {}
       if (!this.robot || !this.robot.id) {
@@ -311,11 +312,20 @@ export default {
       }).catch((res) => {
         this.$toast(res.msg)
       })
+      this.refreshTimer = window.setInterval(() => {
+        this.refreshRobotSnapshot()
+      }, 5000)
     }).catch((error) => {
       this.$toast(error && error.msg ? error.msg : this.$t('empty.log'))
     }).finally(() => {
       this.robotLoading = false
     })
+  },
+  beforeUnmount () {
+    if (this.refreshTimer) {
+      window.clearInterval(this.refreshTimer)
+      this.refreshTimer = null
+    }
   },
   methods: {
     ...mapActions({
@@ -326,6 +336,24 @@ export default {
       apiAccountBalance: 'authorize/apiAccountBalance',
       publicTicker: 'robot/publicTicker'
     }),
+    refreshRobotSnapshot () {
+      return this.robotList().then(() => {
+        const latest = this.robotFind(this.market_id)
+        if (latest) {
+          this.robot = latest
+        }
+        if (this.robot && this.robot.id) {
+          return this.publicTicker({
+            exchange: this.robot.platform,
+            market: this.robot.market_name,
+            currency: 'USD'
+          }).then((res) => {
+            this.last = res && res.data ? res.data.last : this.last
+          })
+        }
+        return null
+      }).catch(() => null)
+    },
     goEdit () {
       if (!this.robot || !this.robot.id) {
         return

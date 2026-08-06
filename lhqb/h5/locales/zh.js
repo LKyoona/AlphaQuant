@@ -60,6 +60,7 @@ export default {
 	okex: 'OKEx',
 	huobi: '火币',
 	binance: '币安',
+	kraken: 'Kraken',
 	gateio: '比特儿',
 	finished_text: '没有更多了',
 	bill: '账单',

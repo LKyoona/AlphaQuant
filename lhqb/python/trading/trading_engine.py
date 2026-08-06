@@ -7,11 +7,13 @@ service start from placing real exchange orders.
 """
 
 import argparse
+import hashlib
 import json
 import logging
 import os
 import re
 import signal
+import tempfile
 import threading
 import time
 import uuid
@@ -23,6 +25,11 @@ from decimal import Decimal, InvalidOperation
 import ccxt
 import pymysql
 import redis
+
+try:
+    import fcntl
+except ImportError:  # Windows only uses the in-process lock during local tests.
+    fcntl = None
 
 
 LOGGER = logging.getLogger("lhqb.trading")
@@ -59,6 +66,11 @@ USER_TEXT_TRANSLATIONS = {
     "交易所 API 身份验证失败，请检查 API Key 和 Secret": "Exchange API authentication failed; check the API key and secret",
     "交易所 API 权限不足，请开启现货读取和现货交易权限": "Exchange API permission denied; enable spot read and trading permissions",
     "交易所请求过于频繁，请稍后重试": "Exchange request rate limit reached; try again later",
+    "Kraken API Key 或 Secret 无效": "Kraken API key or secret is invalid",
+    "Kraken API Nonce 无效，请稍后重试": "Kraken API nonce is temporarily out of sync; retrying automatically",
+    "Kraken API 权限不足，请开启资金查询和现货交易权限": (
+        "Kraken API permission denied; enable funds query and spot trading permissions"
+    ),
     "Binance API 无效、服务器 IP 不在白名单，或 API 未开启现货交易权限（错误码 -2015）": (
         "Binance API is invalid, the server IP is not whitelisted, or spot trading permission is disabled (error -2015)"
     ),
@@ -111,6 +123,9 @@ def user_text(value):
         ("卖出数量低于交易所最小精度", "Sell amount is below the exchange minimum precision"),
         ("交易所返回的成交订单数据不完整", "The exchange returned incomplete filled-order data"),
         ("行情价格必须大于 0", "Market price must be greater than zero"),
+        ("买单下单前检查失败：", "Buy order pre-check failed: "),
+        ("卖单下单前检查失败：", "Sell order pre-check failed: "),
+        (" 下单前检查失败：", " pre-order check failed: "),
         ("买单可能已成交，但成交结果确认失败：", "Buy order may have filled, but settlement confirmation failed: "),
         ("卖单可能已成交，但成交结果确认失败：", "Sell order may have filled, but settlement confirmation failed: "),
         ("买单已成交但数据库记录失败，需要人工核对：", "Buy order filled but database recording failed; manual reconciliation required: "),
@@ -347,6 +362,10 @@ class OrderResult:
 
 class UncertainOrderError(RuntimeError):
     """交易所可能已接受订单，此时自动重试并不安全。"""
+
+
+class OrderNotSubmittedError(RuntimeError):
+    """下单请求尚未发送到交易所，可以安全释放订单锁。"""
 
 
 class InsufficientBalanceError(RuntimeError):
@@ -761,11 +780,148 @@ ORDER BY r.id
         )
 
 
+class KrakenNonceCoordinator:
+    """Serialize Kraken private requests across workers and PHP-FPM."""
+
+    _thread_locks = {}
+    _thread_locks_guard = threading.Lock()
+
+    def __init__(self, api_key, nonce_dir=None):
+        self.api_key = str(api_key or "")
+        self.nonce_dir = nonce_dir or self._default_nonce_dir()
+        self.handle = None
+        self.previous_nonce = 0
+        with self._thread_locks_guard:
+            self.thread_lock = self._thread_locks.setdefault(
+                hashlib.sha256(self.api_key.encode("utf-8")).hexdigest(),
+                threading.Lock(),
+            )
+
+    @staticmethod
+    def _default_nonce_dir():
+        configured = os.getenv("KRAKEN_NONCE_DIR", "").strip()
+        if configured:
+            return configured
+        if os.name == "nt":
+            return os.path.join(tempfile.gettempdir(), "lhqb-kraken-nonce")
+        return "/data/lhqb/shared/runtime/kraken-nonce"
+
+    @property
+    def path(self):
+        key_hash = hashlib.sha256(self.api_key.encode("utf-8")).hexdigest()
+        return os.path.join(self.nonce_dir, "lhqb-kraken-nonce-%s.lock" % key_hash)
+
+    def __enter__(self):
+        self.thread_lock.acquire()
+        try:
+            os.makedirs(self.nonce_dir, mode=0o777, exist_ok=True)
+            try:
+                os.chmod(self.nonce_dir, 0o777)
+            except OSError:
+                pass
+            self.handle = open(self.path, "a+", encoding="ascii")
+            try:
+                os.chmod(self.path, 0o666)
+            except OSError:
+                pass
+            if fcntl is not None:
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_EX)
+            self.handle.seek(0)
+            stored = self.handle.read().strip()
+            self.previous_nonce = int(stored) if stored.isdigit() else 0
+            return self
+        except Exception:
+            if self.handle is not None:
+                self.handle.close()
+                self.handle = None
+            self.thread_lock.release()
+            raise
+
+    def __exit__(self, _exc_type, _exc_value, _traceback):
+        try:
+            if self.handle is not None and fcntl is not None:
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            if self.handle is not None:
+                self.handle.close()
+                self.handle = None
+            self.thread_lock.release()
+
+    def next_nonce(self):
+        if self.handle is None:
+            raise RuntimeError("Kraken Nonce 协调器尚未锁定")
+        nonce = max(time.time_ns(), self.previous_nonce + 1)
+        self.previous_nonce = nonce
+        self.handle.seek(0)
+        self.handle.truncate(0)
+        self.handle.write(str(nonce))
+        self.handle.flush()
+        os.fsync(self.handle.fileno())
+        return nonce
+
+
+class CoordinatedKraken(ccxt.kraken):
+    """Kraken client with shared nonce ordering and safe nonce retries."""
+
+    def __init__(self, config=None):
+        super().__init__(config or {})
+        self._nonce_coordinator = KrakenNonceCoordinator(self.apiKey)
+        self._active_nonce_coordinator = None
+
+    def nonce(self):
+        if self._active_nonce_coordinator is not None:
+            return self._active_nonce_coordinator.next_nonce()
+        with self._nonce_coordinator as coordinator:
+            return coordinator.next_nonce()
+
+    @staticmethod
+    def _is_private_api(api):
+        if isinstance(api, str):
+            return api.lower() == "private"
+        if isinstance(api, dict):
+            return str(api.get("name") or api.get("type") or "").lower() == "private"
+        return "private" in str(api).lower()
+
+    @staticmethod
+    def _is_invalid_nonce(error):
+        return isinstance(error, ccxt.InvalidNonce) or "EAPI:Invalid nonce" in str(error)
+
+    def fetch2(self, path, api="public", method="GET", params=None, headers=None, body=None, config=None):
+        params = {} if params is None else params
+        config = {} if config is None else config
+        if not self._is_private_api(api):
+            return super().fetch2(path, api, method, params, headers, body, config)
+
+        for attempt in range(3):
+            retry_nonce = False
+            with self._nonce_coordinator as coordinator:
+                self._active_nonce_coordinator = coordinator
+                try:
+                    return super().fetch2(path, api, method, params, headers, body, config)
+                except Exception as exc:
+                    retry_nonce = self._is_invalid_nonce(exc) and attempt < 2
+                    if not retry_nonce:
+                        raise
+                finally:
+                    self._active_nonce_coordinator = None
+            if retry_nonce:
+                time.sleep(0.1 * (attempt + 1))
+
+        raise ccxt.InvalidNonce("kraken EAPI:Invalid nonce")
+
+
 class ExchangeGateway:
     def create_exchange(self, robot):
-        exchange_class = getattr(ccxt, normalize_exchange(robot.platform), None)
+        exchange_id = normalize_exchange(robot.platform)
+        exchange_class = CoordinatedKraken if exchange_id == "kraken" else getattr(ccxt, exchange_id, None)
         if exchange_class is None:
             raise RuntimeError("不支持的交易所：%s" % robot.platform)
+        options = {"createMarketBuyOrderRequiresPrice": False}
+        if exchange_id == "binance":
+            # 机器人只做现货交易，避免 CCXT 额外访问 fapi/dapi 合约市场。
+            options.update({"defaultType": "spot", "fetchMarkets": ["spot"]})
+        elif exchange_id == "kraken":
+            options.update({"defaultType": "spot"})
         exchange = exchange_class(
             {
                 "apiKey": robot.api_key,
@@ -773,7 +929,7 @@ class ExchangeGateway:
                 "password": robot.passphrase or None,
                 "enableRateLimit": True,
                 "timeout": int(os.getenv("TRADING_EXCHANGE_TIMEOUT_MS", "30000")),
-                "options": {"createMarketBuyOrderRequiresPrice": False},
+                "options": options,
             }
         )
         proxy = os.getenv("TRADING_HTTPS_PROXY", "").strip()
@@ -783,6 +939,7 @@ class ExchangeGateway:
 
     def market_buy(self, robot, quote_amount, reference_price, client_order_id):
         exchange = self.create_exchange(robot)
+        order_request_started = False
         try:
             exchange.load_markets()
             balance = exchange.fetch_balance()
@@ -792,8 +949,10 @@ class ExchangeGateway:
                 raise InsufficientBalanceError(robot.money, quote_amount, available)
             params = self._client_order_params(exchange, client_order_id)
             if exchange.has.get("createMarketBuyOrderWithCost"):
+                order_request_started = True
                 order = exchange.create_market_buy_order_with_cost(robot.market, float(quote_amount), params)
             elif exchange.id == "binance":
+                order_request_started = True
                 order = exchange.create_order(
                     robot.market,
                     "market",
@@ -805,16 +964,26 @@ class ExchangeGateway:
             else:
                 amount = quote_amount / reference_price
                 amount = exchange.amount_to_precision(robot.market, float(amount))
+                order_request_started = True
                 order = exchange.create_market_buy_order(robot.market, amount, params)
             try:
                 return self._settle_order(exchange, robot, order, side="buy")
             except Exception as exc:
                 raise UncertainOrderError("买单可能已成交，但成交结果确认失败：%s" % exc) from exc
+        except (InsufficientBalanceError, UncertainOrderError):
+            raise
+        except Exception as exc:
+            if not order_request_started:
+                raise OrderNotSubmittedError("买单下单前检查失败：%s" % exc) from exc
+            raise
         finally:
-            exchange.close()
+            close = getattr(exchange, "close", None)
+            if callable(close):
+                close()
 
     def market_sell(self, robot, requested_amount, client_order_id):
         exchange = self.create_exchange(robot)
+        order_request_started = False
         try:
             exchange.load_markets()
             balance = exchange.fetch_balance()
@@ -829,18 +998,29 @@ class ExchangeGateway:
             if as_decimal(precise_amount) <= ZERO:
                 raise RuntimeError("卖出数量低于交易所最小精度")
             params = self._client_order_params(exchange, client_order_id)
+            order_request_started = True
             order = exchange.create_market_sell_order(robot.market, precise_amount, params)
             try:
                 return self._settle_order(exchange, robot, order, side="sell")
             except Exception as exc:
                 raise UncertainOrderError("卖单可能已成交，但成交结果确认失败：%s" % exc) from exc
+        except UncertainOrderError:
+            raise
+        except Exception as exc:
+            if not order_request_started:
+                raise OrderNotSubmittedError("卖单下单前检查失败：%s" % exc) from exc
+            raise
         finally:
-            exchange.close()
+            close = getattr(exchange, "close", None)
+            if callable(close):
+                close()
 
     @staticmethod
     def _client_order_params(exchange, client_order_id):
         if exchange.id == "binance":
             return {"newClientOrderId": client_order_id}
+        if exchange.id == "kraken":
+            return {"cl_ord_id": client_order_id[-18:]}
         return {"clientOrderId": client_order_id}
 
     def _settle_order(self, exchange, robot, order, side):
@@ -1059,6 +1239,18 @@ class TradingEngine:
                 message = str(exc)
                 if self._log_robot_status(robot, "balance:%s" % message, logging.WARNING, "状态=跳过｜原因=%s", message):
                     self._record_robot_error_safely(robot, message)
+            except OrderNotSubmittedError as exc:
+                message = self._order_not_submitted_message(exc)
+                if self._log_robot_status(
+                    robot,
+                    "pre-order:%s" % message,
+                    logging.ERROR,
+                    "状态=跳过｜API=%s｜动作=%s｜原因=%s｜订单请求未发送，已释放订单锁",
+                    robot.api_id,
+                    self._action_name(decision.action),
+                    message,
+                ):
+                    self._record_robot_error_safely(robot, message)
             except ccxt.InsufficientFunds:
                 message = "%s 可用余额不足，交易所拒绝下单" % robot.money
                 if self._log_robot_status(robot, "balance:%s" % message, logging.WARNING, "状态=跳过｜原因=%s", message):
@@ -1095,6 +1287,9 @@ class TradingEngine:
             return
         try:
             order = self.gateway.market_buy(robot, decision.quote_amount, price, client_order_id)
+        except OrderNotSubmittedError as exc:
+            self.repository.release_order_intent(robot, "%s 下单前检查失败：%s" % (decision.reason, exc))
+            raise
         except UncertainOrderError:
             raise
         except ccxt.NetworkError as exc:
@@ -1116,6 +1311,9 @@ class TradingEngine:
             return
         try:
             order = self.gateway.market_sell(robot, state.deal_amount, client_order_id)
+        except OrderNotSubmittedError as exc:
+            self.repository.release_order_intent(robot, "%s 下单前检查失败：%s" % (decision.reason, exc))
+            raise
         except UncertainOrderError:
             raise
         except ccxt.NetworkError as exc:
@@ -1190,6 +1388,8 @@ class TradingEngine:
         return (
             "-2015" in raw
             or "Invalid API-key, IP, or permissions" in raw
+            or "EAPI:Invalid key" in raw
+            or "EGeneral:Permission denied" in raw
             or isinstance(exc, (ccxt.AuthenticationError, ccxt.PermissionDenied))
         )
 
@@ -1198,6 +1398,14 @@ class TradingEngine:
         raw = cls._error_summary(exc)
         if "-2015" in raw or "Invalid API-key, IP, or permissions" in raw:
             return "Binance API 无效、服务器 IP 不在白名单，或 API 未开启现货交易权限（错误码 -2015）"
+        if "EAPI:Invalid key" in raw or "EAPI:Invalid signature" in raw:
+            return "Kraken API Key 或 Secret 无效"
+        if "EGeneral:Permission denied" in raw:
+            return "Kraken API 权限不足，请开启资金查询和现货交易权限"
+        if "EAPI:Invalid nonce" in raw:
+            return "Kraken API Nonce 无效，请稍后重试"
+        if "EOrder:Insufficient funds" in raw:
+            return "交易所可用余额不足，Kraken 拒绝下单"
         if isinstance(exc, ccxt.AuthenticationError):
             return "交易所 API 身份验证失败，请检查 API Key 和 Secret"
         if isinstance(exc, ccxt.PermissionDenied):
@@ -1207,6 +1415,16 @@ class TradingEngine:
         if isinstance(exc, ccxt.NetworkError):
             return "连接交易所失败：%s" % raw
         return "%s：%s" % (exc.__class__.__name__, raw)
+
+    @classmethod
+    def _order_not_submitted_message(cls, exc):
+        current = exc
+        while current is not None:
+            raw = cls._error_summary(current)
+            if "EAPI:Invalid nonce" in raw:
+                return "Kraken API Nonce 无效，请稍后重试"
+            current = current.__cause__
+        return cls._error_summary(exc)
 
 
 def build_argument_parser():

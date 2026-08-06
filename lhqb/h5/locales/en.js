@@ -58,6 +58,7 @@ export default {
   okex: 'OKEx',
   huobi: 'Huobi',
   binance: 'Binance',
+  kraken: 'Kraken',
   gateio: 'Gate.io',
   finished_text: 'No more',
   bill: 'Bill',

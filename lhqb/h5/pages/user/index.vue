@@ -10,7 +10,7 @@
 						</van-col>
 						<van-col v-if="logged" class="page-header-right">
 							<div class="header-actions">
-								<button class="language-btn" type="button" @click="toggleLocale">
+								<button class="language-btn is-hidden" type="button" @click="toggleLocale" aria-hidden="true" tabindex="-1">
 									<van-icon name="underway-o" />
 									<span>{{ locale === 'zh' ? '中' : 'EN' }}</span>
 								</button>
@@ -60,7 +60,6 @@
 			</div>
 
 			<van-cell-group class="list-group">
-				<van-cell icon="underway-o" :title="$t('pageUser.language')" :value="locale === 'zh' ? $t('pageUser.language_zh') : $t('pageUser.language_en')" is-link @click="toggleLocale" />
 				<van-cell icon="records" :title="$t('pageUser.history')" is-link
 					@click="handleLink('/user/caleandar')" />
 				<van-cell v-if="hasCDKey" icon="points" :title="$t('pageUser.cdkey')" is-link
@@ -123,9 +122,6 @@
 					user
 				}) => user.userInfo,
 				initInfo: index => index.initInfo,
-				thirdLoginEnabled: ({
-					thirdLoginEnabled
-				}) => thirdLoginEnabled,
 				locale: state => state.locale
 			})
 		},
@@ -250,6 +246,10 @@
 		.van-icon {
 			font-size: 16px;
 		}
+	}
+
+	.language-btn.is-hidden {
+		display: none;
 	}
 
 	.eyebrow {

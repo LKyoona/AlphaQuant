@@ -131,7 +131,7 @@ try {
     $InstallUnits = ($SystemdUnits | ForEach-Object {
         "install -m 0644 /tmp/$_ /etc/systemd/system/$_"
     }) -join ' && '
-    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/logs/application /data/lhqb/logs/crawler /data/lhqb/logs/market /data/lhqb/logs/trading /data/lhqb/shared/python/venvs && chown -R www-data:www-data /data/lhqb/logs/crawler /data/lhqb/logs/market && $InstallUnits && systemctl daemon-reload"
+    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/logs/application /data/lhqb/logs/crawler /data/lhqb/logs/market /data/lhqb/logs/trading /data/lhqb/shared/python/venvs /data/lhqb/shared/runtime/kraken-nonce && chmod 0777 /data/lhqb/shared/runtime/kraken-nonce && find /data/lhqb/shared/runtime/kraken-nonce -maxdepth 1 -type f -name 'lhqb-kraken-nonce-*.lock' -exec chmod 0666 {} + && chown -R www-data:www-data /data/lhqb/logs/crawler /data/lhqb/logs/market && $InstallUnits && systemctl daemon-reload"
     if ($LASTEXITCODE -ne 0) { throw 'LHQB systemd 服务安装失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "systemctl disable --now neuranet-news-crawler.timer neuranet-backup.timer neuranet-health-check.timer neuranet-smtp-mss.service >/dev/null 2>&1 || true; systemctl enable --now lhqb-news-crawler.timer lhqb-backup.timer lhqb-health-check.timer lhqb-smtp-mss.service; systemctl enable lhqb-market.service lhqb-trading.service"
     if ($LASTEXITCODE -ne 0) { throw 'LHQB systemd 服务启用失败。' }

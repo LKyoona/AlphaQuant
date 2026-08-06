@@ -111,9 +111,15 @@ def create_exchange(exchange_name):
     exchange_class = getattr(ccxt, exchange_name, None)
     if exchange_class is None:
         raise RuntimeError("unsupported CCXT exchange: %s" % exchange_name)
+    options = {}
+    if exchange_name in {"binance", "kraken"}:
+        options["defaultType"] = "spot"
+    if exchange_name == "binance":
+        options["fetchMarkets"] = ["spot"]
     return exchange_class({
         "enableRateLimit": True,
         "timeout": 12000,
+        "options": options,
     })
 
 

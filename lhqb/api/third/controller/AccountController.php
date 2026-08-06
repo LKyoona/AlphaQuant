@@ -2,6 +2,7 @@
 
 namespace api\third\controller;
 
+use api\common\service\KrakenSpotService;
 use cmf\controller\RestBaseController;
 use think\Db;
 use think\Validate;
@@ -52,6 +53,10 @@ class AccountController extends RestBaseController
     public function validateAccount($exchange_class, $apiKey, $secret, $password)
     {
         try {
+            if (strtolower((string) $exchange_class) === 'kraken') {
+                $service = new KrakenSpotService($apiKey, $secret);
+                return array(1, $service->validateCredentials());
+            }
             $this->loadCcxt();
             $exchange = $this->createExchange($exchange_class, $apiKey, $secret, $password);
 
@@ -237,14 +242,12 @@ class AccountController extends RestBaseController
             'platform'     => 'require|in:' . $platforms,
             'api_key'     => 'require',
             'secret_key' => 'require',
-            'passphrase' => 'require',
         ]);
 
         $validate->message([
             'platform.require'  => '平台不能为空!',
             'api_key.require'  => 'API Key不能为空!',
             'secret_key.require'  => 'Secret Key不能为空',
-            'passphrase.require'  => 'Passphrase不能为空!',
         ]);
 
         $data = $this->request->param();
@@ -255,7 +258,10 @@ class AccountController extends RestBaseController
         $platform = $data['platform'];
         $apiKey = $data['api_key'];
         $secretKey = $data['secret_key'];
-        $passphrase = $data['passphrase'];
+        $passphrase = isset($data['passphrase']) ? trim((string) $data['passphrase']) : '';
+        if (in_array(strtolower((string) $platform), ['okex', 'okx', 'okex3'], true) && $passphrase === '') {
+            $this->error('Passphrase不能为空!');
+        }
         $platforms = Db::name("third_platform")->select()->toArray();
         $exchange_class = array_column($platforms, 'class', 'platform');
         //$exchange_class = array('okex' => 'okex3', 'binance' => 'binance', 'huobi' => 'hbdm', 'gateio' => 'gateio');
@@ -263,7 +269,7 @@ class AccountController extends RestBaseController
             $this->error('无法验证该平台API有效性:', $platform);
         }
         //测试api信息是否正确
-        $ret = $this->validateAccount($exchange_class[$platform], $data['api_key'], $data['secret_key'], $data['passphrase']);
+        $ret = $this->validateAccount($exchange_class[$platform], $apiKey, $secretKey, $passphrase);
         if ($ret[0] != 1) {
             $this->error('API信息校验错误:' . $ret[1]);
         }
@@ -413,12 +419,22 @@ class AccountController extends RestBaseController
                 $balance = null;
                 $summary = null;
                 $errors = [];
-                try {
-                    $this->loadCcxt();
-                    $exchange = $this->createExchange($exchange_class[$platform], $apiKey, $secretKey, $passphrase);
-                    list($balance, $summary, $errors) = $this->fetchBestBalance($exchange, $platform);
-                } catch (\Throwable $e) {
-                    $errors[] = 'ccxt: ' . $e->getMessage();
+                if (strtolower((string) $platform) === 'kraken') {
+                    try {
+                        $balance = (new KrakenSpotService($apiKey, $secretKey))->fetchBalance();
+                        $summary = $this->normalizeBalance($balance, 'USDT');
+                        $summary['account_type'] = 'spot';
+                    } catch (\Throwable $e) {
+                        $errors[] = 'kraken: ' . $e->getMessage();
+                    }
+                } else {
+                    try {
+                        $this->loadCcxt();
+                        $exchange = $this->createExchange($exchange_class[$platform], $apiKey, $secretKey, $passphrase);
+                        list($balance, $summary, $errors) = $this->fetchBestBalance($exchange, $platform);
+                    } catch (\Throwable $e) {
+                        $errors[] = 'ccxt: ' . $e->getMessage();
+                    }
                 }
 
                 if (strtolower($platform) === 'binance' && (empty($summary) || ((float) $summary['total'] <= 0 && (float) $summary['free'] <= 0))) {

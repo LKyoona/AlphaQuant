@@ -1,15 +1,21 @@
 import unittest
+import os
+import tempfile
 import threading
 from dataclasses import replace
 from decimal import Decimal
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import ccxt
 
 from trading.trading_engine import (
     Decision,
+    CoordinatedKraken,
     ExchangeGateway,
     InsufficientBalanceError,
+    KrakenNonceCoordinator,
+    OrderNotSubmittedError,
     OrderResult,
     RobotConfig,
     RuntimeState,
@@ -140,6 +146,10 @@ class StrategyPlannerTests(unittest.TestCase):
             "Open initial position; average=1862.97 amount=0.0031968 cost=5.961504",
             user_text("首次建仓; average=1862.97 amount=0.0031968 cost=5.961504"),
         )
+        self.assertEqual(
+            "Buy order pre-check failed: Kraken API nonce is temporarily out of sync; retrying automatically",
+            user_text("买单下单前检查失败：Kraken API Nonce 无效，请稍后重试"),
+        )
 
     def test_invalid_runtime_state_is_not_treated_as_a_position(self):
         self.assertIsNone(RuntimeState.from_json('{"base_price":0}'))
@@ -194,6 +204,22 @@ class OrderIntentTests(unittest.TestCase):
             engine._execute_buy(robot(), None, decision, Decimal("100"))
         self.assertFalse(repository.released)
 
+    def test_pre_order_failure_releases_intent(self):
+        repository = self.FakeRepository()
+        engine = self.engine(repository, self.FakeGateway(OrderNotSubmittedError("load markets failed")))
+        decision = Decision(StrategyPlanner.OPEN, None, ZERO, "open", Decimal("100"))
+        with self.assertRaises(OrderNotSubmittedError):
+            engine._execute_buy(robot(), None, decision, Decimal("100"))
+        self.assertTrue(repository.released)
+
+    def test_network_failure_after_order_request_keeps_intent_locked(self):
+        repository = self.FakeRepository()
+        engine = self.engine(repository, self.FakeGateway(ccxt.NetworkError("request result unknown")))
+        decision = Decision(StrategyPlanner.OPEN, None, ZERO, "open", Decimal("100"))
+        with self.assertRaises(ccxt.NetworkError):
+            engine._execute_buy(robot(), None, decision, Decimal("100"))
+        self.assertFalse(repository.released)
+
     def test_binance_2015_rejection_releases_intent(self):
         repository = self.FakeRepository()
         error = ccxt.DDoSProtection(
@@ -239,6 +265,60 @@ class BalanceCheckTests(unittest.TestCase):
         self.assertEqual(Decimal("25"), raised.exception.available)
         self.assertFalse(exchange.order_called)
 
+    def test_market_loading_failure_is_known_to_be_before_order_submission(self):
+        exchange = self.FakeExchange()
+        exchange.load_markets = lambda: (_ for _ in ()).throw(ccxt.NetworkError("exchangeInfo unavailable"))
+        gateway = ExchangeGateway()
+        gateway.create_exchange = lambda _robot: exchange
+
+        with self.assertRaises(OrderNotSubmittedError):
+            gateway.market_buy(robot(), Decimal("100"), Decimal("10"), "client-1")
+
+        self.assertFalse(exchange.order_called)
+
+    def test_binance_exchange_loads_spot_markets_only(self):
+        exchange = ExchangeGateway().create_exchange(robot())
+        self.assertEqual("spot", exchange.options.get("defaultType"))
+        self.assertEqual(["spot"], exchange.options.get("fetchMarkets"))
+
+    def test_kraken_exchange_is_spot_and_does_not_require_passphrase(self):
+        exchange = ExchangeGateway().create_exchange(robot(platform="kraken", passphrase=""))
+        self.assertEqual("kraken", exchange.id)
+        self.assertEqual("spot", exchange.options.get("defaultType"))
+        self.assertFalse(exchange.requiredCredentials.get("password"))
+
+    def test_kraken_order_params_never_enable_validation_mode(self):
+        exchange = SimpleNamespace(id="kraken")
+        params = ExchangeGateway._client_order_params(exchange, "lhqb12345678901234567890")
+        self.assertEqual({"cl_ord_id": "345678901234567890"}, params)
+        self.assertNotIn("validate", params)
+
+    def test_kraken_nonce_is_shared_and_strictly_increasing(self):
+        with tempfile.TemporaryDirectory() as nonce_dir:
+            first = KrakenNonceCoordinator("same-key", nonce_dir)
+            second = KrakenNonceCoordinator("same-key", nonce_dir)
+            with first as coordinator:
+                first_nonce = coordinator.next_nonce()
+            with second as coordinator:
+                second_nonce = coordinator.next_nonce()
+
+        self.assertEqual(19, len(str(first_nonce)))
+        self.assertGreater(second_nonce, first_nonce)
+
+    def test_kraken_private_request_retries_only_invalid_nonce(self):
+        with tempfile.TemporaryDirectory() as nonce_dir:
+            with patch.dict(os.environ, {"KRAKEN_NONCE_DIR": nonce_dir}):
+                exchange = CoordinatedKraken({"apiKey": "same-key", "secret": "secret"})
+                with patch.object(
+                    ccxt.kraken,
+                    "fetch2",
+                    side_effect=[ccxt.InvalidNonce("EAPI:Invalid nonce"), {"ok": True}],
+                ) as request:
+                    result = exchange.fetch2("Balance", "private", "POST")
+
+        self.assertEqual({"ok": True}, result)
+        self.assertEqual(2, request.call_count)
+
 
 class UserIsolationTests(unittest.TestCase):
     class FakeRepository:
@@ -274,6 +354,24 @@ class UserIsolationTests(unittest.TestCase):
         message = TradingEngine._exchange_error_message(error)
         self.assertIn("服务器 IP 不在白名单", message)
         self.assertIn("错误码 -2015", message)
+
+    def test_kraken_permission_error_is_translated_and_releases_order_intent(self):
+        error = ccxt.PermissionDenied("kraken EGeneral:Permission denied")
+        message = TradingEngine._exchange_error_message(error)
+        self.assertIn("Kraken API 权限不足", message)
+        self.assertTrue(TradingEngine._is_definitive_exchange_rejection(error))
+
+    def test_kraken_nonce_precheck_error_is_normalized(self):
+        try:
+            raise ccxt.InvalidNonce('kraken {"error":["EAPI:Invalid nonce"]}')
+        except ccxt.InvalidNonce as cause:
+            error = OrderNotSubmittedError("买单下单前检查失败")
+            error.__cause__ = cause
+
+        self.assertEqual(
+            "Kraken API Nonce 无效，请稍后重试",
+            TradingEngine._order_not_submitted_message(error),
+        )
 
     def test_repeated_robot_status_is_logged_only_once(self):
         engine = object.__new__(TradingEngine)

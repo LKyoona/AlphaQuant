@@ -35,8 +35,15 @@ export default {
 	min-height: 100dvh;
   position: relative;
   z-index: 1;
+	padding-top: var(--page-top-gap-nav, 8px);
 	padding-bottom: calc(var(--bottom-nav-height, 82px) + env(safe-area-inset-bottom) + 12px);
   overflow-x: hidden;
   overflow-y: visible;
+}
+
+@media (min-width: 768px) {
+  .page-content {
+    padding-top: 0;
+  }
 }
 </style>

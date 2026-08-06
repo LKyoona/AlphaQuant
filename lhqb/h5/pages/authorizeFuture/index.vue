@@ -98,7 +98,7 @@ export default {
   },
   computed: {
     ...mapState({
-      platform: ({ authorize }) => authorize.platform
+      platform: ({ authorize }) => (authorize.platform || []).filter(item => item.supportsFuture)
     }),
     currentPlatform () {
       return this.platform && this.platform[this.active] ? this.platform[this.active] : null

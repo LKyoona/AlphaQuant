@@ -54,7 +54,7 @@ export default {
   },
   computed: {
     ...mapState({
-      platforms: ({ authorize }) => authorize.platform
+      platforms: ({ authorize }) => (authorize.platform || []).filter(item => item.supportsFuture)
     }),
     active () {
       const index = Number(this.$route.query.active || 0)

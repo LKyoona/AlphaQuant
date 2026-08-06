@@ -11,6 +11,7 @@
 
 namespace app\user\controller;
 
+use api\common\service\KrakenSpotService;
 use cmf\controller\AdminBaseController;
 use think\Db;
 
@@ -341,6 +342,54 @@ class AdminIndexController extends AdminBaseController
         return [$valuation, $errors];
     }
 
+    private function fetchKrakenAccountOverview($apiKey, $secret)
+    {
+        $service = new KrakenSpotService($apiKey, $secret);
+        $balance = $service->fetchBalance();
+        $spotAssets = $this->normalizeExchangeAssets($balance, 'spot');
+        if (empty($spotAssets)) {
+            return [null, ['Kraken 余额接口未返回资产']];
+        }
+
+        $spotUsdt = $spotAssets['USDT'] ?? ['free' => 0, 'used' => 0, 'total' => 0];
+        try {
+            $prices = $service->fetchUsdtPrices(array_keys($spotAssets));
+            $totalAssets = 0.0;
+            $valuedAssets = 0;
+            $unpricedAssets = [];
+            $positiveAssets = 0;
+            foreach ($spotAssets as $symbol => $item) {
+                $amount = (float) ($item['total'] ?? 0);
+                if ($amount <= 0) {
+                    continue;
+                }
+                $positiveAssets++;
+                if (!isset($prices[$symbol])) {
+                    $unpricedAssets[] = $symbol;
+                    continue;
+                }
+                $totalAssets += $amount * (float) $prices[$symbol];
+                $valuedAssets++;
+            }
+            $valuation = [
+                'total_assets' => round($totalAssets, 8),
+                'valued_assets' => $valuedAssets,
+                'unpriced_assets' => $unpricedAssets,
+            ];
+        } catch (\Throwable $e) {
+            return [null, ['Kraken 行情: ' . $e->getMessage()]];
+        }
+        if ($positiveAssets > 0 && $valuedAssets === 0) {
+            return [null, ['Kraken 行情暂时不可用，请稍后重试']];
+        }
+        $valuation['withdrawable'] = round((float) ($spotUsdt['free'] ?? 0), 8);
+        $valuation['resolved'] = true;
+        $errors = empty($unpricedAssets)
+            ? []
+            : ['Kraken 部分币种暂未取得行情：' . implode('、', $unpricedAssets)];
+        return [$valuation, $errors];
+    }
+
     private function calculateBalanceValueInUsdt($exchange, array $balance)
     {
         $usdtBalance = $this->normalizeExchangeBalance($balance, 'USDT');
@@ -571,6 +620,15 @@ class AdminIndexController extends AdminBaseController
                     $normalizedError = $binanceErrorMap[-2017];
                 }
             }
+            if (stripos($error, 'kraken') !== false) {
+                if (stripos($error, 'Invalid key') !== false || stripos($error, 'Key 或 Secret 无效') !== false) {
+                    $normalizedError = 'Kraken API Key 或 Secret 无效';
+                } elseif (stripos($error, 'Invalid nonce') !== false || stripos($error, 'Nonce 无效') !== false) {
+                    $normalizedError = 'Kraken API Nonce 无效，请稍后重试';
+                } elseif (stripos($error, 'Permission denied') !== false || stripos($error, '权限不足') !== false) {
+                    $normalizedError = 'Kraken API 权限不足，请开启资金查询和现货交易权限';
+                }
+            }
             if ($normalizedError !== '' && !in_array($normalizedError, $normalizedErrors, true)) {
                 $normalizedErrors[] = $normalizedError;
             }
@@ -636,13 +694,20 @@ class AdminIndexController extends AdminBaseController
             }
             $summary = null;
             try {
-                $exchange = $this->createExchangeClient($exchangeClassMap[$platform], trim((string) $api['api_key']), trim((string) $api['secret_key']), trim((string) $api['passphrase']));
-                list($summary, $queryErrors) = $this->fetchExchangeAccountOverview(
-                    $exchange,
-                    $platform,
-                    trim((string) $api['api_key']),
-                    trim((string) $api['secret_key'])
-                );
+                if (strtolower((string) $platform) === 'kraken') {
+                    list($summary, $queryErrors) = $this->fetchKrakenAccountOverview(
+                        trim((string) $api['api_key']),
+                        trim((string) $api['secret_key'])
+                    );
+                } else {
+                    $exchange = $this->createExchangeClient($exchangeClassMap[$platform], trim((string) $api['api_key']), trim((string) $api['secret_key']), trim((string) $api['passphrase']));
+                    list($summary, $queryErrors) = $this->fetchExchangeAccountOverview(
+                        $exchange,
+                        $platform,
+                        trim((string) $api['api_key']),
+                        trim((string) $api['secret_key'])
+                    );
+                }
                 foreach ($queryErrors as $queryError) {
                     $errors[] = $platform . ': ' . $queryError;
                 }

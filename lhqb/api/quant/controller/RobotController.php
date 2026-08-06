@@ -57,18 +57,18 @@ class RobotController extends RestBaseController
             $robot_list = $robot_list->toArray();
         }
         foreach ($robot_list as &$robot) {
-            //unset($robot['values_str']);
-            if(!empty($robot['values_str'])){
-                $values_str = json_decode($robot['values_str'],true);
-                
-                $price = $values_str['base_price'];
-                
-                $rate = number_format($robot['revenue']/$robot['first_order_value'],4);
-            }else{
-                $price = 0;
-                $rate = '-';
+            $values = [];
+            if (!empty($robot['values_str'])) {
+                $decoded = json_decode($robot['values_str'], true);
+                $values = is_array($decoded) ? $decoded : [];
             }
-            
+            $price = isset($values['base_price']) ? $values['base_price'] : 0;
+            $firstOrderValue = (float) $robot['first_order_value'];
+            $rate = $firstOrderValue > 0
+                ? number_format((float) $robot['revenue'] / $firstOrderValue, 4, '.', '')
+                : '0.0000';
+
+            $robot['values'] = $values;
             $robot['price'] = $price;
             $robot['rate'] = $rate;
         }

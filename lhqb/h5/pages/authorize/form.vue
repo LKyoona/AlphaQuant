@@ -29,7 +29,7 @@
             :rules="[{ required: true }]"
           />
           <van-field
-            v-if="platform === 'okex'"
+            v-if="currentPlatform.requiresPassphrase"
             v-model="passphrase"
             label="Passphrase"
             :placeholder="$t('pageAuthorizeForm.passphrase_placeholder')"
@@ -40,6 +40,8 @@
               block
               native-type="submit"
               class="submit-btn"
+              :loading="submitting"
+              :disabled="submitting"
             >
               {{ $t('actions.import') }}
             </van-button>
@@ -57,7 +59,8 @@ export default {
     return {
       api_key: '',
       secret_key: '',
-      passphrase: ''
+      passphrase: '',
+      submitting: false
     }
   },
   created () {
@@ -101,11 +104,15 @@ export default {
       this.passphrase = p.passphrase || ''
     },
     onSubmit () {
+      if (this.submitting) {
+        return
+      }
+      this.submitting = true
       const payload = {
         platform: this.platform,
         api_key: this.api_key,
         secret_key: this.secret_key,
-        passphrase: this.platform === 'okex' ? this.passphrase : '-'
+        passphrase: this.currentPlatform.requiresPassphrase ? this.passphrase : ''
       }
       this.$toast.loading()
       this.editApiAccount(payload).then((res) => {
@@ -116,6 +123,8 @@ export default {
       }).catch(({ msg }) => {
         this.$toast.clear()
         this.$toast(msg)
+      }).finally(() => {
+        this.submitting = false
       })
     }
   }

@@ -1,5 +1,6 @@
 import { IS_STANDALONE } from '@/config/index'
 import binanceLogo from '@/assets/images/binance.png'
+import krakenLogo from '@/assets/images/kraken.png'
 export const CNY = 'CNY'
 export const USD = 'USD'
 export const CURRENCIES = {
@@ -20,7 +21,17 @@ const platform = [
   {
     name: '币安',
     label: 'binance',
-    logo: binanceLogo
+    logo: binanceLogo,
+    requiresPassphrase: false,
+    supportsFuture: true
+  },
+  {
+    name: 'Kraken',
+    label: 'kraken',
+    logo: krakenLogo,
+    requiresPassphrase: false,
+    supportsFuture: false
   }
 ]
 export const PLATFORM = platform
+export const FUTURE_PLATFORM = platform.filter(item => item.supportsFuture)

@@ -1,7 +1,7 @@
 import API from '@/constants/api'
-import { PLATFORM } from '@/constants/global'
+import { FUTURE_PLATFORM } from '@/constants/global'
 export const state = () => ({
-  platform: PLATFORM,
+  platform: FUTURE_PLATFORM,
   marketData: { okex: [], huobi: [], binance: [], gateio: [], sinance: [] },
   robotList: [],
   recommendList: ['SFP/USDT','RUNE/USDT','ENJ/USDT'],

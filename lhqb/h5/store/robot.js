@@ -5,7 +5,7 @@ let pendingRobotListRequest = null
 
 export const state = () => ({
   platform: PLATFORM,
-  marketData: { okex: [], huobi: [], binance: [], gateio: [], sinance: [] },
+  marketData: { okex: [], huobi: [], binance: [], kraken: [], gateio: [], sinance: [] },
   robotList: []
 })
 
@@ -44,8 +44,11 @@ export const actions = {
       .then((result) => {
         const data = Array.isArray(result.data) ? result.data : []
         data.forEach((item) => {
-          item.values = {}
-          if (item.values_str) {
+          const serverValues = item.values
+          item.values = serverValues && typeof serverValues === 'object' && !Array.isArray(serverValues)
+            ? serverValues
+            : {}
+          if (!Object.keys(item.values).length && item.values_str) {
             try {
               item.values = JSON.parse(item.values_str)
             } catch (error) {

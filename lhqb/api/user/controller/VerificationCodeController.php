@@ -53,6 +53,8 @@ class VerificationCodeController extends RestBaseController
             return ['error' => 1, 'message' => '邮箱发送配置未启用'];
         }
 
+        list($routeName, $config) = $this->resolveEmailRoute($config, $address);
+
         $pool = [];
         if (!empty($config['pool']) && is_array($config['pool'])) {
             foreach ($config['pool'] as $account) {
@@ -80,14 +82,14 @@ class VerificationCodeController extends RestBaseController
         $poolSize = count($pool);
         $maxAttempts = max(1, min($poolSize, (int) ($config['max_attempts'] ?? $poolSize)));
         $startIndex = (int) (sprintf('%u', crc32(strtolower($address) . date('YmdHi'))) % $poolSize);
-        $result = $this->attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, true);
+        $result = $this->attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, true, $routeName);
         if (empty($result['error'])) {
             return $result;
         }
 
         if (($result['attempts'] ?? 0) === 0 && ($result['skipped'] ?? 0) >= $poolSize) {
             $this->logVerificationMailStatus('all smtp accounts were cooling down, retrying without cooldown gate, target=' . $this->maskEmail($address));
-            $retryResult = $this->attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, false);
+            $retryResult = $this->attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, false, $routeName);
             if (empty($retryResult['error'])) {
                 return $retryResult;
             }
@@ -97,7 +99,39 @@ class VerificationCodeController extends RestBaseController
         return $result;
     }
 
-    private function attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, $respectCooldown)
+    private function resolveEmailRoute(array $config, $address)
+    {
+        $defaultRouteName = trim((string) ($config['route_name'] ?? 'poste'));
+        $defaultRouteName = $defaultRouteName === '' ? 'poste' : $defaultRouteName;
+        $parts = explode('@', strtolower(trim((string) $address)), 2);
+        $domain = count($parts) === 2 ? $parts[1] : '';
+
+        if ($domain !== '' && !empty($config['routes']) && is_array($config['routes'])) {
+            foreach ($config['routes'] as $routeName => $routeConfig) {
+                if (!is_array($routeConfig) || empty($routeConfig['enabled'])) {
+                    continue;
+                }
+                $domains = isset($routeConfig['domains']) && is_array($routeConfig['domains'])
+                    ? array_map('strtolower', array_map('trim', $routeConfig['domains']))
+                    : [];
+                if (!in_array($domain, $domains, true)) {
+                    continue;
+                }
+
+                $resolved = array_merge($config, $routeConfig);
+                if (!array_key_exists('pool', $routeConfig)) {
+                    unset($resolved['pool']);
+                }
+                unset($resolved['routes'], $resolved['domains']);
+                return [(string) $routeName, $resolved];
+            }
+        }
+
+        unset($config['routes']);
+        return [$defaultRouteName, $config];
+    }
+
+    private function attemptSendVerificationEmail($pool, $address, $subject, $message, $maxAttempts, $respectCooldown, $routeName = 'poste')
     {
         $poolSize = count($pool);
         $startIndex = (int) (sprintf('%u', crc32(strtolower($address) . date('YmdHi'))) % $poolSize);
@@ -130,7 +164,7 @@ class VerificationCodeController extends RestBaseController
             $attempts++;
             $result = $this->sendSmtpMail($smtpSetting, $address, $subject, $message);
             if (empty($result['error'])) {
-                $this->logVerificationMailStatus('success to ' . $this->maskEmail($address) . ', account=' . $this->maskEmail($username) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0'));
+                $this->logVerificationMailStatus('success route=' . $routeName . ', target=' . $this->maskEmail($address) . ', account=' . $this->maskEmail($username) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0'));
                 return ['error' => 0, 'message' => 'success'];
             }
 
@@ -141,10 +175,10 @@ class VerificationCodeController extends RestBaseController
             $safeUser = $this->maskEmail($username);
             $safeError = mb_substr(str_replace(["\r", "\n"], ' ', $lastMessage), 0, 300, 'UTF-8');
             trace('SMTP邮箱池发送失败 [' . $safeUser . ']: ' . $safeError, 'error');
-            $this->logVerificationMailStatus('failed account=' . $safeUser . ', target=' . $this->maskEmail($address) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0') . ', auth_error=' . ($isAuthError ? '1' : '0') . ', message=' . $safeError);
+            $this->logVerificationMailStatus('failed route=' . $routeName . ', account=' . $safeUser . ', target=' . $this->maskEmail($address) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0') . ', auth_error=' . ($isAuthError ? '1' : '0') . ', message=' . $safeError);
         }
 
-        $this->logVerificationMailStatus('all attempts exhausted, target=' . $this->maskEmail($address) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0') . ', last=' . mb_substr(str_replace(["\r", "\n"], ' ', $lastMessage), 0, 300, 'UTF-8'));
+        $this->logVerificationMailStatus('all attempts exhausted, route=' . $routeName . ', target=' . $this->maskEmail($address) . ', attempts=' . $attempts . ', skipped=' . $skipCount . ', pool=' . $poolSize . ', respect_cooldown=' . ($respectCooldown ? '1' : '0') . ', last=' . mb_substr(str_replace(["\r", "\n"], ' ', $lastMessage), 0, 300, 'UTF-8'));
         return [
             'error' => 1,
             'message' => $lastMessage === '' ? 'SMTP 邮箱池暂无可用账号' : $lastMessage,
