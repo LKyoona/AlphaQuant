@@ -12,7 +12,7 @@
 							<div class="header-actions">
 								<button class="language-btn is-hidden" type="button" @click="toggleLocale" aria-hidden="true" tabindex="-1">
 									<van-icon name="underway-o" />
-									<span>{{ locale === 'zh' ? '中' : 'EN' }}</span>
+									<span>{{ locale === 'zh' ? '中' : (locale === 'pt_br' ? 'PT' : 'EN') }}</span>
 								</button>
 								<nuxt-link to="/user/settings" class="settings-btn">
 									<van-icon name="setting-o" color="#8e8678" size="20" />
@@ -129,8 +129,8 @@
 			...mapActions({
 				setLang: 'setLang'
 			}),
-			toggleLocale() {
-				const locale = this.locale === 'zh' ? 'en' : 'zh'
+				toggleLocale() {
+					const locale = this.locale === 'zh' ? 'en' : (this.locale === 'en' ? 'pt_br' : 'zh')
 				this.$i18n.locale = locale
 				if (this.$root && this.$root.$i18n) {
 					this.$root.$i18n.locale = locale

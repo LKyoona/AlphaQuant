@@ -3,6 +3,7 @@
 namespace api\trade\controller;
 
 use api\common\service\RedisPackage;
+use api\common\service\CoinbaseAdvancedService;
 use cmf\controller\RestBaseController;
 use think\Db;
 use think\Validate;
@@ -269,6 +270,20 @@ class PublicController extends RestBaseController
         try {
             if (strtolower($this->exchange_name) === 'binance') {
                 $result = $this->fetchBinancePublicTicker($this->market);
+            } elseif (strtolower($this->exchange_name) === 'coinbase') {
+                $result = (new CoinbaseAdvancedService('', ''))->fetchTicker($this->market);
+                $result = [
+                    'symbol' => $result['symbol'],
+                    'open' => 0,
+                    'high' => 0,
+                    'low' => 0,
+                    'close' => $result['last'],
+                    'last' => $result['last'],
+                    'change' => 0,
+                    'percentage' => 0,
+                    'baseVolume' => 0,
+                    'quoteVolume' => 0,
+                ];
             } else {
                 $exchange = new $this->className();
                 $result = $exchange->fetch_ticker($this->market);

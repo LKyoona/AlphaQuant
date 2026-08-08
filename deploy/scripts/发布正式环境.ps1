@@ -112,6 +112,23 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '邮件配置上传失败。' }
     ssh -i $SshKey -o BatchMode=yes $Server "install -o root -g www-data -m 0640 /tmp/lhqb-email.php /data/lhqb/shared/data/conf/email.php && rm -f /tmp/lhqb-email.php"
     if ($LASTEXITCODE -ne 0) { throw '邮件配置安装失败。' }
+    $ApiLanguageFiles = Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'data\conf') -Filter 'api_lang*.php' -File
+    if ($ApiLanguageFiles.Count -eq 0) {
+        throw '未找到 API 语言配置文件。'
+    }
+    $ApiLanguageInstall = @()
+    $ApiLanguageCleanup = @()
+    foreach ($ApiLanguageFile in $ApiLanguageFiles) {
+        $RemoteName = "lhqb-$($ApiLanguageFile.Name)"
+        scp -i $SshKey -o BatchMode=yes $ApiLanguageFile.FullName "${Server}:/tmp/$RemoteName"
+        if ($LASTEXITCODE -ne 0) { throw "API 语言配置上传失败：$($ApiLanguageFile.Name)" }
+        $ApiLanguageInstall += "install -o root -g www-data -m 0640 /tmp/$RemoteName /data/lhqb/shared/data/conf/$($ApiLanguageFile.Name)"
+        $ApiLanguageCleanup += "/tmp/$RemoteName"
+    }
+    $ApiLanguageInstallCommand = $ApiLanguageInstall -join ' && '
+    $ApiLanguageCleanupCommand = $ApiLanguageCleanup -join ' '
+    ssh -i $SshKey -o BatchMode=yes $Server "mkdir -p /data/lhqb/shared/data/conf && if [ -f /data/lhqb/shared/data/conf/api_lang.php ]; then cp -pf /data/lhqb/shared/data/conf/api_lang.php /data/lhqb/shared/data/conf/api_lang.php.previous; fi && $ApiLanguageInstallCommand && rm -f $ApiLanguageCleanupCommand"
+    if ($LASTEXITCODE -ne 0) { throw 'API 语言配置安装失败。' }
     $SystemdUnits = @(
         'lhqb-backup.service',
         'lhqb-backup.timer',

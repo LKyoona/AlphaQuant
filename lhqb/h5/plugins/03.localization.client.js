@@ -1,12 +1,6 @@
 import { createI18n } from 'vue-i18n'
-import enLocale from '@/locales/en'
-import zhLocale from '@/locales/zh'
+import { defaultLocale, fallbackLocale, messages } from '@/locales'
 import { langStorage } from '@/utils/storage'
-
-const messages = {
-  en: enLocale,
-  zh: zhLocale
-}
 
 const locales = Object.keys(messages)
 
@@ -14,9 +8,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   const route = useRoute()
   const store = nuxtApp.$store
   let locale = route.query.lang
-  const fallbackLocale = 'en'
-  const defaultLocale = 'en'
-
   if (locale && locales.includes(locale)) {
     store.dispatch('setLang', locale)
   } else {

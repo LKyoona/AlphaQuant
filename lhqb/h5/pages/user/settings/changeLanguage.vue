@@ -12,13 +12,14 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { Locale } from 'vant'
+import enUS from 'vant/es/locale/lang/en-US'
+import ptBR from 'vant/es/locale/lang/pt-BR'
+import { languageOptions } from '@/locales'
 export default {
   data () {
     return {
-      langs: {
-        zh: '中文',
-        en: 'English'
-      }
+      langs: Object.fromEntries(Object.entries(languageOptions).map(([locale, config]) => [locale, config.label]))
     }
   },
   computed: {
@@ -31,6 +32,7 @@ export default {
       setLang: 'setLang'
     }),
     changeFn (index) {
+      Locale.use(index === 'pt_br' ? 'pt-BR' : 'en-US', index === 'pt_br' ? ptBR : enUS)
       this.$i18n.locale = index
       if (this.$root && this.$root.$i18n) {
         this.$root.$i18n.locale = index

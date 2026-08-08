@@ -12,6 +12,7 @@
 namespace app\user\controller;
 
 use api\common\service\KrakenSpotService;
+use api\common\service\CoinbaseAdvancedService;
 use cmf\controller\AdminBaseController;
 use think\Db;
 
@@ -390,6 +391,55 @@ class AdminIndexController extends AdminBaseController
         return [$valuation, $errors];
     }
 
+    private function fetchCoinbaseAccountOverview($apiKey, $secret)
+    {
+        $service = new CoinbaseAdvancedService($apiKey, $secret);
+        $balance = $service->fetchBalance();
+        $assets = $this->normalizeExchangeAssets($balance, 'spot');
+        if (empty($assets)) {
+            return [null, ['Coinbase 余额接口未返回资产']];
+        }
+
+        $totalAssets = 0.0;
+        $valuedAssets = 0;
+        $unpricedAssets = [];
+        foreach ($assets as $symbol => $item) {
+            $amount = (float) ($item['total'] ?? 0);
+            if ($amount <= 0) {
+                continue;
+            }
+            if ($symbol === 'USDT') {
+                $totalAssets += $amount;
+                $valuedAssets++;
+                continue;
+            }
+            try {
+                $ticker = $service->fetchTicker($symbol . '/USDT');
+                $price = (float) ($ticker['last'] ?? 0);
+                if ($price <= 0) {
+                    $unpricedAssets[] = $symbol;
+                    continue;
+                }
+                $totalAssets += $amount * $price;
+                $valuedAssets++;
+            } catch (\Throwable $e) {
+                $unpricedAssets[] = $symbol;
+            }
+        }
+
+        if ($valuedAssets === 0) {
+            return [null, ['Coinbase 行情暂时不可用，请稍后重试']];
+        }
+        $usdt = $assets['USDT'] ?? ['free' => 0];
+        return [[
+            'total_assets' => round($totalAssets, 8),
+            'withdrawable' => round((float) ($usdt['free'] ?? 0), 8),
+            'valued_assets' => $valuedAssets,
+            'unpriced_assets' => $unpricedAssets,
+            'resolved' => true,
+        ], empty($unpricedAssets) ? [] : ['Coinbase 部分币种暂未取得行情：' . implode('、', $unpricedAssets)]];
+    }
+
     private function calculateBalanceValueInUsdt($exchange, array $balance)
     {
         $usdtBalance = $this->normalizeExchangeBalance($balance, 'USDT');
@@ -682,10 +732,9 @@ class AdminIndexController extends AdminBaseController
         }
         require_once $ccxtFile;
 
-        $totalUsdt = 0;
-        $withdrawableUsdt = 0;
         $successCount = 0;
         $errors = [];
+        $exchangeResults = [];
         foreach ($apis as $api) {
             $platform = $api['platform'];
             if (empty($exchangeClassMap[$platform])) {
@@ -694,7 +743,12 @@ class AdminIndexController extends AdminBaseController
             }
             $summary = null;
             try {
-                if (strtolower((string) $platform) === 'kraken') {
+                if (strtolower((string) $platform) === 'coinbase') {
+                    list($summary, $queryErrors) = $this->fetchCoinbaseAccountOverview(
+                        trim((string) $api['api_key']),
+                        trim((string) $api['secret_key'])
+                    );
+                } elseif (strtolower((string) $platform) === 'kraken') {
                     list($summary, $queryErrors) = $this->fetchKrakenAccountOverview(
                         trim((string) $api['api_key']),
                         trim((string) $api['secret_key'])
@@ -716,8 +770,14 @@ class AdminIndexController extends AdminBaseController
             }
 
             if (!empty($summary) && !empty($summary['resolved'])) {
-                $totalUsdt += (float) $summary['total_assets'];
-                $withdrawableUsdt += (float) $summary['withdrawable'];
+                $exchangeResults[] = [
+                    'api_id' => (int) ($api['id'] ?? 0),
+                    'platform' => strtolower((string) $platform),
+                    'label' => ucfirst((string) $platform),
+                    'total_assets' => round((float) $summary['total_assets'], 4),
+                    'withdrawable' => round((float) $summary['withdrawable'], 4),
+                    'unit' => 'USDT',
+                ];
                 $successCount++;
             } else {
                 $errors[] = $platform . ': 未查询到可折算为 USDT 的资产，请检查 API 权限或账户类型';
@@ -731,13 +791,11 @@ class AdminIndexController extends AdminBaseController
         }
 
         $result = [
-            'total' => round($totalUsdt, 4),
-            'total_assets' => round($totalUsdt, 4),
-            'withdrawable' => round($withdrawableUsdt, 4),
-            'unit' => 'USDT',
+            'exchanges' => $exchangeResults,
             'api_count' => count($apis),
             'success_count' => $successCount,
-            'query_time' => date('Y-m-d H:i:s')
+            'query_time' => date('Y-m-d H:i:s'),
+            'errors' => $errors,
         ];
         $this->success('查询成功', '', $result);
     }

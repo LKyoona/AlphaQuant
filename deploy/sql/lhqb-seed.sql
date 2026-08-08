@@ -3,9 +3,11 @@ SET NAMES utf8mb4;
 DELETE FROM `jl_rate` WHERE `currency_symbol` IN ('USD', 'USDT', 'CNY');
 DELETE FROM `jl_ticker` WHERE `exchange_class` = 'binance' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT');
 DELETE FROM `jl_ticker` WHERE `exchange_class` = 'kraken' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT');
+DELETE FROM `jl_ticker` WHERE `exchange_class` = 'coinbase' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT');
 DELETE FROM `jl_spot_market` WHERE `platform` = 'binance' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT');
 DELETE FROM `jl_spot_market` WHERE `platform` = 'kraken' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT');
-DELETE FROM `jl_third_platform` WHERE `platform` IN ('binance', 'okex', 'huobipro', 'kraken');
+DELETE FROM `jl_spot_market` WHERE `platform` = 'coinbase' AND `market` IN ('BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT');
+DELETE FROM `jl_third_platform` WHERE `platform` IN ('binance', 'okex', 'huobipro', 'kraken', 'coinbase');
 DELETE FROM `jl_coin` WHERE `coin_symbol` IN ('BTC', 'ETH', 'USDT', 'BNB', 'SOL', 'XRP');
 
 INSERT INTO `jl_rate` (`currency_symbol`, `currency_symbol_char`, `usd_rate`, `name`)
@@ -30,7 +32,8 @@ VALUES
   ('binance', 'binance'),
   ('okex', 'okex'),
   ('huobipro', 'huobipro'),
-  ('kraken', 'kraken')
+  ('kraken', 'kraken'),
+  ('coinbase', 'coinbase')
 ;
 
 INSERT INTO `jl_spot_market` (`platform`, `market_name`, `market`, `type`, `stock`, `money`, `min_stock`, `min_money`, `update_time`, `sort`, `status`)
@@ -44,6 +47,10 @@ VALUES
   ('kraken', 'ETH/USDT', 'ETH/USDT', 1, 'ETH', 'USDT', 0.0010000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 40, 1),
   ('kraken', 'SOL/USDT', 'SOL/USDT', 1, 'SOL', 'USDT', 0.0600000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 30, 1),
   ('kraken', 'XRP/USDT', 'XRP/USDT', 1, 'XRP', 'USDT', 1.6500000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 20, 1)
+  ,('coinbase', 'BTC/USDT', 'BTC/USDT', 1, 'BTC', 'USDT', 0.0000500000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 50, 1)
+  ,('coinbase', 'ETH/USDT', 'ETH/USDT', 1, 'ETH', 'USDT', 0.0010000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 40, 1)
+  ,('coinbase', 'SOL/USDT', 'SOL/USDT', 1, 'SOL', 'USDT', 0.0600000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 30, 1)
+  ,('coinbase', 'XRP/USDT', 'XRP/USDT', 1, 'XRP', 'USDT', 1.6500000000000000, 10.0000000000000000, UNIX_TIMESTAMP(), 20, 1)
 ;
 
 INSERT INTO `jl_ticker` (`exchange_name`, `exchange_class`, `market`, `coin`, `currency`, `volume`, `price`, `change`, `update_time`, `sort`, `default`, `status`)
@@ -57,6 +64,10 @@ VALUES
   ('Kraken', 'kraken', 'ETH/USDT', 'ETH', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 40, 0, 1),
   ('Kraken', 'kraken', 'SOL/USDT', 'SOL', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 30, 0, 1),
   ('Kraken', 'kraken', 'XRP/USDT', 'XRP', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 20, 0, 1)
+  ,('Coinbase', 'coinbase', 'BTC/USDT', 'BTC', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 50, 0, 1)
+  ,('Coinbase', 'coinbase', 'ETH/USDT', 'ETH', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 40, 0, 1)
+  ,('Coinbase', 'coinbase', 'SOL/USDT', 'SOL', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 30, 0, 1)
+  ,('Coinbase', 'coinbase', 'XRP/USDT', 'XRP', 'USDT', 0.0000, 0.0000, 0.0000, UNIX_TIMESTAMP(), 20, 0, 1)
 ;
 
 INSERT INTO `jl_option` (`autoload`, `option_name`, `option_value`)

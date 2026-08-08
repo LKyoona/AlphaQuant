@@ -989,9 +989,9 @@
 	.exchange-card {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) auto;
-		grid-template-areas: "main query" "message message";
-		align-items: start;
-		gap: 2px 8px;
+		grid-template-areas: "main main" "message query";
+		align-items: center;
+		gap: 6px 8px;
 		min-height: 0;
 		padding: 0;
 		border: 0;
@@ -1000,85 +1000,6 @@
 		box-shadow: none
 	}
 
-	.exchange-top {
-		grid-area: main;
-		min-width: 0
-	}
-
-	.exchange-top>div {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr);
-		align-items: baseline;
-		column-gap: 7px;
-		row-gap: 2px;
-		min-width: 0
-	}
-
-	.exchange-top>div>.exchange-meta:first-child {
-		grid-column: 1;
-		margin: 0;
-		color: #667085;
-		font-size: 10px;
-		font-weight: 600;
-		line-height: 18px;
-		white-space: nowrap
-	}
-
-	.exchange-top>div>.exchange-meta:first-child:before {
-		display: none;
-		content: none
-	}
-
-	.exchange-amount {
-		grid-column: 2;
-		margin: 0;
-		color: #175cd3;
-		font-size: 14px;
-		font-weight: 700;
-		line-height: 18px;
-		white-space: nowrap
-	}
-
-	.exchange-unit {
-		margin-left: 3px;
-		color: #7b8492;
-		font-size: 9px;
-		font-weight: 600
-	}
-
-	.exchange-top>div>.exchange-meta:not(:first-child) {
-		grid-column: 1 / -1;
-		display: flex;
-		align-items: center;
-		min-width: 0;
-		min-height: 16px;
-		margin: 0;
-		padding: 0;
-		border: 0;
-		border-radius: 0;
-		color: #7b8492;
-		font-size: 10px;
-		line-height: 16px;
-		background: transparent
-	}
-
-	.exchange-top>div>.exchange-meta:not(:first-child):before {
-		flex: 0 0 auto;
-		width: 4px;
-		height: 4px;
-		margin-right: 6px;
-		border-radius: 50%;
-		background: #98a2b3;
-		content: ""
-	}
-
-	.js-exchange-withdrawable {
-		color: #475467 !important
-	}
-
-	.js-exchange-withdrawable:before {
-		background: #2f6fed !important
-	}
 
 	.exchange-query-btn {
 		grid-area: query;
@@ -1119,6 +1040,10 @@
 		background: transparent
 	}
 
+	.exchange-query-msg[title="默认展示历史余额"] {
+		white-space: nowrap
+	}
+
 	.exchange-query-msg:before {
 		flex: 0 0 auto;
 		width: 4px;
@@ -1147,30 +1072,76 @@
 		background: #22a559
 	}
 
+	.exchange-query-msg.is-partial {
+		color: #9a6700;
+		background: transparent
+	}
+
+	.exchange-query-msg.is-partial:before {
+		background: #eaaa08
+	}
+
 	.exchange-query-msg.is-error {
 		color: #b42318;
 		background: transparent
 	}
 
 	.exchange-query-msg.is-error:before {
-		background: #f04438
+			background: #f04438
+		}
+
+	.exchange-results {
+		grid-area: main;
+		display: grid;
+		gap: 5px;
+		min-width: 190px
 	}
 
-	/* 第五版：余额绿色强调，邀请数量与渠道拆列。 */
-	.exchange-amount,
-	.exchange-amount .exchange-unit {
-		color: #16803c
+	.exchange-result-row {
+		display: grid;
+		grid-template-columns: minmax(64px, auto) minmax(82px, 1fr);
+		column-gap: 8px;
+		align-items: center;
+		padding-bottom: 4px;
+		border-bottom: 1px dashed #e8ecf2
 	}
 
-	.js-exchange-withdrawable {
-		color: #16803c !important;
-		font-weight: 600
+	.exchange-result-row:last-child {
+		padding-bottom: 0;
+		border-bottom: 0
 	}
 
-	.js-exchange-withdrawable:before {
-		background: #22a559 !important
+	.exchange-result-platform {
+		overflow: hidden;
+		color: #344054;
+		font-size: 11px;
+		font-weight: 700;
+		text-overflow: ellipsis;
+		text-transform: capitalize;
+		white-space: nowrap
 	}
 
+	.exchange-result-assets {
+		color: #16803c;
+		font-size: 12px;
+		font-weight: 700;
+		text-align: right;
+		white-space: nowrap
+	}
+
+	.exchange-result-withdrawable {
+		grid-column: 1 / -1;
+		color: #7b8492;
+		font-size: 9px;
+		text-align: right
+	}
+
+	.exchange-empty {
+		color: #98a2b3;
+		font-size: 10px
+	}
+
+	/* 邀请数量与渠道拆列。 */
 	.col-invite-count {
 		width: 92px;
 		text-align: center
@@ -1287,27 +1258,18 @@
 													<php>
 														$exchangeBalance=isset($exchangeBalanceMap[$vo['id']])?$exchangeBalanceMap[$vo['id']]:[];$exchangeApiCount=isset($exchangeApiStatsMap[$vo['id']])?$exchangeApiStatsMap[$vo['id']]:0;
 													</php>
-													<div class="exchange-card">
-														<div class="exchange-top">
-															<div>
-																<div class="exchange-meta">总资产</div>
-																<strong
-																	class="exchange-amount js-exchange-balance-value"
-																	data-uid="{$vo.id}">
-																	<if
-																		condition="isset($exchangeBalance['total_assets_usd'])">
-																										{$exchangeBalance.total_assets_usd|default='0'}
-																		<else />-
-																	</if><span class="exchange-unit">USDT</span>
-																									</strong>
-																									<div class="exchange-meta js-exchange-withdrawable" data-uid="{$vo.id}">可提现资金：- USDT</div>
-																<div class="exchange-meta">授权API：{$exchangeApiCount} 个
-																	<if
-																		condition="!empty($exchangeBalance['platform'])">
-																		· {$exchangeBalance.platform}</if>
-																</div>
-															</div>
+											<div class="exchange-card">
+												<div class="exchange-results js-exchange-results" data-uid="{$vo.id}">
+													<if condition="!empty($exchangeBalance['platform'])">
+														<div class="exchange-result-row">
+															<span class="exchange-result-platform">{$exchangeBalance.platform}</span>
+															<span class="exchange-result-assets">{$exchangeBalance.total_assets_usd|default='-'} USDT</span>
+															<span class="exchange-result-withdrawable">历史余额</span>
 														</div>
+														<else />
+														<div class="exchange-empty">授权API：{$exchangeApiCount} 个，点击实时查询</div>
+													</if>
+												</div>
 														<if condition="$exchangeApiCount gt 0"><button type="button"
 																class="exchange-query-btn js-query-exchange-balance"
 																data-uid="{$vo.id}">实时查询</button>
@@ -1352,9 +1314,9 @@
 																	class="action-link action-disabled">{:lang('BLOCK_USER')}</span>
 															</neq>
 														</if>
-														<if
-															condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/editUser')">
-															<a class="action-link"
+																	<if
+																	condition="cmf_auth_check(cmf_get_current_admin_id(),'user/AdminIndex/editUser')">
+																	<a class="action-link"
 																href="{:url('adminIndex/editUser',array('id'=>$vo['id']))}">编辑</a>
 														</if>
 														<if
@@ -1383,9 +1345,9 @@
 				uid = $button.data('uid'),
 				$row = $button.closest('tr'),
 				$msg = $row.find('.js-exchange-query-msg[data-uid="' + uid + '"]'),
-				$value = $row.find('.js-exchange-balance-value[data-uid="' + uid + '"]');
+				$results = $row.find('.js-exchange-results[data-uid="' + uid + '"]');
 			$button.prop('disabled', true).html('<span class="query-spinner"></span>查询中');
-			$msg.removeClass('is-success is-error').addClass('is-loading').text('正在连接交易所接口...').attr('title',
+			$msg.removeClass('is-success is-partial is-error').addClass('is-loading').text('正在连接交易所接口...').attr('title',
 				'正在连接交易所接口...');
 			$.ajax({
 				url: "{:url('AdminIndex/queryExchangeBalancePost')}",
@@ -1396,23 +1358,29 @@
 				},
 				success: function(res) {
 					if (res.code == 1) {
-						if (!res.data || res.data.total_assets == null || res.data.withdrawable == null) {
-							var invalidMsg = '余额数据异常，未返回可提现资金或总资产';
+						if (!res.data || !Array.isArray(res.data.exchanges) || !res.data.exchanges.length) {
+							var invalidMsg = '余额数据异常，未返回交易所明细';
 							$msg.removeClass('is-loading is-success').addClass('is-error').text(invalidMsg)
 								.attr('title', invalidMsg);
 							return;
 						}
-						var total = res.data.total_assets,
-							withdrawable = res.data.withdrawable,
-							queryTime = res.data && res.data.query_time ? res.data.query_time : '刚刚',
+						var queryTime = res.data && res.data.query_time ? res.data.query_time : '刚刚',
 							successCount = res.data && res.data.success_count != null ? res.data
 							.success_count : 0,
 							apiCount = res.data && res.data.api_count != null ? res.data.api_count : 0,
-							msg = '更新于 ' + queryTime + ' · 成功 ' + successCount + '/' + apiCount;
-						$value.html(total + '<span class="exchange-unit">USDT</span>');
-						$row.find('.js-exchange-withdrawable[data-uid="' + uid + '"]').text('可提现资金：' + withdrawable + ' USDT');
-						$msg.removeClass('is-loading is-error').addClass('is-success').text(msg).attr(
-							'title', msg)
+							hasErrors = Array.isArray(res.data.errors) && res.data.errors.length > 0,
+							msg = (hasErrors ? '部分成功 ' : '查询成功 ') + successCount + '/' + apiCount + ' · ' + queryTime,
+							detailTitle = hasErrors ? res.data.errors.join('\n') : msg;
+						$results.empty();
+						$.each(res.data.exchanges, function(_, exchange) {
+							var $resultRow = $('<div class="exchange-result-row"></div>');
+							$('<span class="exchange-result-platform"></span>').text(exchange.label || exchange.platform || 'Exchange').appendTo($resultRow);
+							$('<span class="exchange-result-assets"></span>').text(exchange.total_assets + ' ' + (exchange.unit || 'USDT')).appendTo($resultRow);
+							$('<span class="exchange-result-withdrawable"></span>').text('可提现 ' + exchange.withdrawable + ' ' + (exchange.unit || 'USDT')).appendTo($resultRow);
+							$results.append($resultRow);
+						});
+						$msg.removeClass('is-loading is-success is-partial is-error').addClass(hasErrors ? 'is-partial' : 'is-success').text(msg).attr(
+							'title', detailTitle)
 					} else {
 						var errorMsg = res.msg || '查询失败';
 						$msg.removeClass('is-loading is-success').addClass('is-error').text(errorMsg)

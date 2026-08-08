@@ -334,13 +334,20 @@ class RestBaseController
         }
 
         $language = strtolower(str_replace('-', '_', (string) $language));
-        if (strpos($language, 'zh') === 0) {
-            return 'zh_cn';
-        }
-        if (strpos($language, 'en') === 0) {
-            return 'en_us';
+        $langPack = $this->getApiLangPack();
+        $aliases  = empty($langPack['_aliases']) || !is_array($langPack['_aliases']) ? [] : $langPack['_aliases'];
+        if (isset($aliases[$language])) {
+            return $aliases[$language];
         }
 
+        $primaryLanguage = explode('_', $language)[0];
+        if (isset($aliases[$primaryLanguage])) {
+            return $aliases[$primaryLanguage];
+        }
+
+        if (isset($langPack[$language]) && is_array($langPack[$language])) {
+            return $language;
+        }
         return 'zh_cn';
     }
 
@@ -378,20 +385,27 @@ class RestBaseController
         }
 
         $message = trim($msg);
-        $messages = empty($langPack[$language]['messages']) ? [] : $langPack[$language]['messages'];
-        if (isset($messages[$message])) {
-            return $messages[$message];
+        $languages = [$language];
+        if ($language !== 'en_us' && !empty($langPack['en_us'])) {
+            $languages[] = 'en_us';
         }
 
-        $prefixes = empty($langPack[$language]['prefixes']) ? [] : $langPack[$language]['prefixes'];
-        foreach ($prefixes as $prefix => $translation) {
-            if (strpos($message, $prefix) === 0) {
-                $suffix = substr($message, strlen($prefix));
-                $trimmedSuffix = trim($suffix);
-                if ($trimmedSuffix !== '' && isset($messages[$trimmedSuffix])) {
-                    $suffix = (strlen($suffix) > strlen(ltrim($suffix)) ? ' ' : '') . $messages[$trimmedSuffix];
+        foreach ($languages as $candidate) {
+            $messages = empty($langPack[$candidate]['messages']) ? [] : $langPack[$candidate]['messages'];
+            if (isset($messages[$message])) {
+                return $messages[$message];
+            }
+
+            $prefixes = empty($langPack[$candidate]['prefixes']) ? [] : $langPack[$candidate]['prefixes'];
+            foreach ($prefixes as $prefix => $translation) {
+                if (strpos($message, $prefix) === 0) {
+                    $suffix = substr($message, strlen($prefix));
+                    $trimmedSuffix = trim($suffix);
+                    if ($trimmedSuffix !== '' && isset($messages[$trimmedSuffix])) {
+                        $suffix = (strlen($suffix) > strlen(ltrim($suffix)) ? ' ' : '') . $messages[$trimmedSuffix];
+                    }
+                    return $translation . $suffix;
                 }
-                return $translation . $suffix;
             }
         }
 

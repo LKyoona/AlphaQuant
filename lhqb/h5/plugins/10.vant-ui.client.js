@@ -35,6 +35,7 @@ import {
   showToast
 } from 'vant'
 import enUS from 'vant/es/locale/lang/en-US'
+import ptBR from 'vant/es/locale/lang/pt-BR'
 import 'vant/lib/index.css'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -68,7 +69,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   ]
 
   components.forEach(component => nuxtApp.vueApp.use(component))
-  Locale.use('en-US', enUS)
+  const locale = nuxtApp.$store?.state?.locale
+  Locale.use(locale === 'pt_br' ? 'pt-BR' : 'en-US', locale === 'pt_br' ? ptBR : enUS)
 
   const normalizeMessageOptions = options => (typeof options === 'string' ? { message: options } : options)
 

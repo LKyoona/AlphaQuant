@@ -1,8 +1,15 @@
 <?php
 
 return [
-    // H5 API 轻量国际化语言包。
-    // 前端会随请求提交 language=zh_cn 或 language=en_us。
+    // H5 API language packs. The H5 sends the value configured in locales/index.js.
+    '_aliases' => [
+        'zh' => 'zh_cn',
+        'zh_cn' => 'zh_cn',
+        'en' => 'en_us',
+        'en_us' => 'en_us',
+        'pt' => 'pt_br',
+        'pt_br' => 'pt_br',
+    ],
     // 后端接口仍可使用原中文文案，统一在 RestBaseController 输出前翻译。
     'zh_cn' => [
         'messages' => [],
@@ -201,4 +208,5 @@ return [
             '请先注册成为AI会员,才能继续哦！' => 'Please register as an AI member to continue!',
         ],
     ],
+    'pt_br' => require __DIR__ . '/api_lang_pt_br.php',
 ];

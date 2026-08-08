@@ -5,7 +5,7 @@ let pendingRobotListRequest = null
 
 export const state = () => ({
   platform: PLATFORM,
-  marketData: { okex: [], huobi: [], binance: [], kraken: [], gateio: [], sinance: [] },
+  marketData: { okex: [], huobi: [], binance: [], kraken: [], coinbase: [], gateio: [], sinance: [] },
   robotList: []
 })
 

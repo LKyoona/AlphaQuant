@@ -1,5 +1,6 @@
 import axios from 'axios'
 import qs from 'qs'
+import { getApiLanguage } from '@/locales'
 import { tokenStorage } from '~/utils/storage'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -16,7 +17,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   api.interceptors.request.use((request) => {
     const store = nuxtApp.$store
     const params = {
-      language: ['zh', 'tw'].includes(store?.state?.locale) ? 'zh_cn' : 'en_us',
+      language: getApiLanguage(store?.state?.locale),
       ...request.data
     }
 

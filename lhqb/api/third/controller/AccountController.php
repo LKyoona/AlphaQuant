@@ -3,6 +3,7 @@
 namespace api\third\controller;
 
 use api\common\service\KrakenSpotService;
+use api\common\service\CoinbaseAdvancedService;
 use cmf\controller\RestBaseController;
 use think\Db;
 use think\Validate;
@@ -53,6 +54,9 @@ class AccountController extends RestBaseController
     public function validateAccount($exchange_class, $apiKey, $secret, $password)
     {
         try {
+            if (strtolower((string) $exchange_class) === 'coinbase') {
+                return array(1, (new CoinbaseAdvancedService($apiKey, $secret))->validateCredentials());
+            }
             if (strtolower((string) $exchange_class) === 'kraken') {
                 $service = new KrakenSpotService($apiKey, $secret);
                 return array(1, $service->validateCredentials());
@@ -419,7 +423,15 @@ class AccountController extends RestBaseController
                 $balance = null;
                 $summary = null;
                 $errors = [];
-                if (strtolower((string) $platform) === 'kraken') {
+                if (strtolower((string) $platform) === 'coinbase') {
+                    try {
+                        $balance = (new CoinbaseAdvancedService($apiKey, $secretKey))->fetchBalance();
+                        $summary = $this->normalizeBalance($balance, 'USDT');
+                        $summary['account_type'] = 'spot';
+                    } catch (\Throwable $e) {
+                        $errors[] = 'coinbase: ' . $e->getMessage();
+                    }
+                } elseif (strtolower((string) $platform) === 'kraken') {
                     try {
                         $balance = (new KrakenSpotService($apiKey, $secretKey))->fetchBalance();
                         $summary = $this->normalizeBalance($balance, 'USDT');

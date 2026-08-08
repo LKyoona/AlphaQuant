@@ -76,7 +76,14 @@ ln -sfn "${old_release}" "${PREVIOUS_LINK}"
 ln -sfn "${release_dir}" "${CURRENT_LINK}.next"
 mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
 
-if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
+# Templates are compiled into the shared runtime directory. Clear only
+# generated template/cache files after switching releases so removed or
+# renamed admin templates cannot survive a deployment.
+mkdir -p "${APP_ROOT}/shared/data/runtime/temp" "${APP_ROOT}/shared/data/runtime/cache"
+find "${APP_ROOT}/shared/data/runtime/temp" -mindepth 1 -delete
+find "${APP_ROOT}/shared/data/runtime/cache" -mindepth 1 -delete
+
+if ! nginx -t || ! systemctl restart php8.1-fpm || ! systemctl reload nginx || \
    ! systemctl restart lhqb-market.service || \
    ! systemctl restart lhqb-trading.service || \
    ! curl --silent --show-error --fail --max-time 20 \
@@ -84,7 +91,9 @@ if ! nginx -t || ! systemctl reload php8.1-fpm || ! systemctl reload nginx || \
       "https://${DOMAIN}/api/home/main/init" >/dev/null; then
   ln -sfn "${old_release}" "${CURRENT_LINK}.next"
   mv -Tf "${CURRENT_LINK}.next" "${CURRENT_LINK}"
-  systemctl reload php8.1-fpm || true
+  find "${APP_ROOT}/shared/data/runtime/temp" -mindepth 1 -delete || true
+  find "${APP_ROOT}/shared/data/runtime/cache" -mindepth 1 -delete || true
+  systemctl restart php8.1-fpm || true
   systemctl reload nginx || true
   systemctl restart lhqb-market.service || true
   systemctl restart lhqb-trading.service || true

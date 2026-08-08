@@ -1,6 +1,7 @@
 import { IS_STANDALONE } from '@/config/index'
 import binanceLogo from '@/assets/images/binance.png'
 import krakenLogo from '@/assets/images/kraken.png'
+import coinbaseLogo from '@/assets/images/coinbase.png'
 export const CNY = 'CNY'
 export const USD = 'USD'
 export const CURRENCIES = {
@@ -29,6 +30,13 @@ const platform = [
     name: 'Kraken',
     label: 'kraken',
     logo: krakenLogo,
+    requiresPassphrase: false,
+    supportsFuture: false
+  },
+  {
+    name: 'Coinbase',
+    label: 'coinbase',
+    logo: coinbaseLogo,
     requiresPassphrase: false,
     supportsFuture: false
   }

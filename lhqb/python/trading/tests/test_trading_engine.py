@@ -2,6 +2,7 @@ import unittest
 import os
 import tempfile
 import threading
+from contextlib import contextmanager
 from dataclasses import replace
 from decimal import Decimal
 from types import SimpleNamespace
@@ -17,6 +18,7 @@ from trading.trading_engine import (
     KrakenNonceCoordinator,
     OrderNotSubmittedError,
     OrderResult,
+    Repository,
     RobotConfig,
     RuntimeState,
     StrategyPlanner,
@@ -107,6 +109,78 @@ class StrategyPlannerTests(unittest.TestCase):
     def test_manual_clean_closes_open_position(self):
         decision = StrategyPlanner.evaluate(robot(is_clean=True), state(), Decimal("99"))
         self.assertEqual(StrategyPlanner.CLOSE, decision.action)
+
+
+class ManualClosePersistenceTests(unittest.TestCase):
+    class FakeCursor:
+        def __init__(self):
+            self.statements = []
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def execute(self, sql, params):
+            self.statements.append((" ".join(sql.split()), params))
+            return 1
+
+    class FakeConnection:
+        def __init__(self, cursor):
+            self.cursor_value = cursor
+
+        def cursor(self):
+            return self.cursor_value
+
+    @staticmethod
+    def repository(cursor):
+        repository = object.__new__(Repository)
+        repository.tables = {
+            "quant_robot": "`jl_quant_robot`",
+            "quant_robot_order": "`jl_quant_robot_order`",
+            "quant_robot_revenue": "`jl_quant_robot_revenue`",
+            "quant_robot_log": "`jl_quant_robot_log`",
+        }
+
+        @contextmanager
+        def transaction():
+            yield ManualClosePersistenceTests.FakeConnection(cursor)
+
+        repository.transaction = transaction
+        repository._insert_order = lambda *_args, **_kwargs: None
+        repository._insert_log = lambda *_args, **_kwargs: None
+        return repository
+
+    def test_manual_close_stops_cycle_robot_after_sell(self):
+        cursor = self.FakeCursor()
+        repository = self.repository(cursor)
+        closed_robot = robot(is_clean=True, recycle_status=1)
+        order = OrderResult("sell-1", Decimal("110"), Decimal("1"), Decimal("110"))
+
+        repository.record_sell(closed_robot, state(), order, "用户发起手动清仓")
+
+        update = next(statement for statement in cursor.statements if "UPDATE `jl_quant_robot`" in statement[0])
+        self.assertEqual(0, update[1][0])
+
+    def test_automatic_close_keeps_cycle_robot_running(self):
+        cursor = self.FakeCursor()
+        repository = self.repository(cursor)
+        order = OrderResult("sell-1", Decimal("110"), Decimal("1"), Decimal("110"))
+
+        repository.record_sell(robot(is_clean=False, recycle_status=1), state(), order, "止盈平仓")
+
+        update = next(statement for statement in cursor.statements if "UPDATE `jl_quant_robot`" in statement[0])
+        self.assertEqual(1, update[1][0])
+
+    def test_empty_manual_close_stops_robot(self):
+        cursor = self.FakeCursor()
+        repository = self.repository(cursor)
+
+        repository.acknowledge_empty_clean(robot(is_clean=True, recycle_status=1))
+
+        sql, _params = cursor.statements[0]
+        self.assertIn("status = 0", sql)
 
     def test_investment_modes_match_existing_rules(self):
         self.assertEqual(Decimal("400"), robot(c_type=1).cover_quote_amount(2))

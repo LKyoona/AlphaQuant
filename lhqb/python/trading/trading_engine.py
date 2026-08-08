@@ -648,7 +648,9 @@ ORDER BY r.id
 
     def record_sell(self, robot, state, order, reason):
         revenue = order.cost - state.deal_money
-        next_status = 1 if robot.recycle_status == 1 else 0
+        # A manual close is also a stop command. Keep the configured strategy
+        # type intact so the user can explicitly enable the same robot later.
+        next_status = 0 if robot.is_clean else (1 if robot.recycle_status == 1 else 0)
         with self.transaction() as connection:
             with connection.cursor() as cursor:
                 self._insert_order(cursor, robot, order, side=1, is_first=2, pid=state.pid)
@@ -684,7 +686,7 @@ ORDER BY r.id
             with connection.cursor() as cursor:
                 cursor.execute(
                     f"UPDATE {self.tables['quant_robot']} "
-                    "SET is_clean = 0, values_str = '', revenue = 0, show_msg = %s WHERE id = %s",
+                    "SET is_clean = 0, values_str = '', revenue = 0, status = 0, show_msg = %s WHERE id = %s",
                     ("No open position to clear", robot.id),
                 )
                 self._insert_log(cursor, robot, "Clear request acknowledged; no open position")
@@ -921,6 +923,9 @@ class ExchangeGateway:
             # 机器人只做现货交易，避免 CCXT 额外访问 fapi/dapi 合约市场。
             options.update({"defaultType": "spot", "fetchMarkets": ["spot"]})
         elif exchange_id == "kraken":
+            options.update({"defaultType": "spot"})
+        elif exchange_id == "coinbase":
+            # Coinbase Advanced Trade uses an EC private key in the secret field.
             options.update({"defaultType": "spot"})
         exchange = exchange_class(
             {

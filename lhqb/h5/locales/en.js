@@ -59,6 +59,7 @@ export default {
   huobi: 'Huobi',
   binance: 'Binance',
   kraken: 'Kraken',
+  coinbase: 'Coinbase',
   gateio: 'Gate.io',
   finished_text: 'No more',
   bill: 'Bill',

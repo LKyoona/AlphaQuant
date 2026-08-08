@@ -61,6 +61,7 @@ export default {
 	huobi: '火币',
 	binance: '币安',
 	kraken: 'Kraken',
+	coinbase: 'Coinbase',
 	gateio: '比特儿',
 	finished_text: '没有更多了',
 	bill: '账单',
